@@ -1,0 +1,91 @@
+name: supply-chain-forensics
+version: "1.0.0"
+description: >
+  An AI agent investigates a compromised software project's dependency graph
+  to identify supply chain attacks. Simulates real-world scenarios including
+  typosquatting, hijacked maintainer accounts, and poisoned transitive
+  dependencies — mirroring incidents like the 2024 XZ Utils backdoor and
+  the 2026 Axios NPM compromise.
+
+author: "Supply Chain Forensics Team"
+license: MIT
+
+tasks:
+  - id: easy
+    name: Typosquat Detection
+    description: >
+      Identify a typosquatted package in a JavaScript fintech project.
+      The malicious package mimics a popular utility library with a name
+      differing by 2 characters and contains a postinstall beacon script.
+    max_steps: 12
+    difficulty: easy
+    score_range: [0.0, 1.0]
+
+  - id: medium
+    name: Hijacked Maintainer Account
+    description: >
+      A legitimate Python package with a 3-year history was compromised
+      when its maintainer's credentials were stolen. The attack mirrors
+      the March 2026 Axios incident. Only the latest version is malicious.
+      The malicious code only fires in CI environments.
+    max_steps: 20
+    difficulty: medium
+    score_range: [0.0, 1.0]
+
+  - id: hard
+    name: Transitive Dependency Poisoning
+    description: >
+      A malicious package is buried 4 levels deep in the dependency tree
+      of a Next.js enterprise platform. Standard audit tools show 0 results.
+      The attack is CI-triggered only, reads SSH keys and AWS credentials,
+      and was introduced via an automated weekly dependency bump.
+    max_steps: 30
+    difficulty: hard
+    score_range: [0.0, 1.0]
+
+observation_space:
+  type: dict
+  properties:
+    step: {type: integer, description: "Current step number"}
+    action_taken: {type: string, description: "Last action executed"}
+    result: {type: object, description: "Structured result of the action"}
+    packages_flagged: {type: array, items: {type: string}, description: "Packages flagged so far"}
+    steps_remaining: {type: integer, description: "Budget remaining"}
+    last_action_error: {type: string, nullable: true}
+
+action_space:
+  type: dict
+  properties:
+    action:
+      type: string
+      enum:
+        - list_packages
+        - get_audit_output
+        - get_git_log
+        - inspect_package
+        - check_publish_history
+        - check_maintainer
+        - trace_network
+        - check_similarity
+        - get_dependency_tree
+        - submit_findings
+    params:
+      type: object
+
+reward:
+  description: >
+    Per-step: -0.02 efficiency penalty.
+    On submit_findings: F1 score (precision × recall) × 0.8 + vector classification bonus (0.1 per correct vector) + efficiency bonus (up to 0.1).
+    Total clamped to [0.0, 1.0].
+  range: [-0.02, 1.0]
+
+endpoints:
+  reset: POST /reset
+  step:  POST /step
+  state: GET  /state/{session_id}
+  health: GET /health
+
+runtime:
+  language: python
+  version: "3.11"
+  framework: fastapi

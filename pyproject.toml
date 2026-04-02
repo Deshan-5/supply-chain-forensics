@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "supply-chain-forensics"
+version = "1.0.0"
+description = "OpenEnv benchmark for supply chain attack forensics"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "fastapi==0.110.0",
+  "uvicorn[standard]==0.27.1",
+  "pydantic>=2.7,<2.9",
+  "requests==2.31.0",
+  "openai>=2.7.2",
+  "httpx<0.28",
+  "python-multipart==0.0.9",
+  "openenv-core>=0.2.0"
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[tool.setuptools]
+packages = ["env", "server"]
+py-modules = ["app", "inference"]
