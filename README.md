@@ -7,7 +7,7 @@ colorTo: purple
 sdk: docker
 app_port: 7860
 pinned: false
--------------
+---
 
 # Supply Chain Attack Forensics Lab
 
