@@ -1,4 +1,4 @@
----
+<!--
 title: Supply Chain Forensics
 emoji: 🔍
 colorFrom: blue
@@ -6,7 +6,7 @@ colorTo: purple
 sdk: docker
 app_port: 7860
 pinned: false
----
+-->
 
 # Supply Chain Forensics
 
