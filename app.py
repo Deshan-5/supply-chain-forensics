@@ -59,7 +59,7 @@ def root():
     return {
         "name": "Supply Chain Attack Forensics Lab",
         "version": "1.0.0",
-        "tasks": ["easy", "medium", "hard"],
+        "tasks": ["easy", "medium", "hard", "confusion"],
         "endpoints": {
             "reset": "POST /reset",
             "step":  "POST /step",

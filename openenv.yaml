@@ -98,3 +98,26 @@ runtime:
   language: python
   version: "3.11"
   framework: fastapi
+
+evaluation:
+  method: "programmatic + LLM"
+  metrics:
+    - precision: "Malicious packages correctly identified"
+    - recall: "All malicious packages found"
+    - attack_vector_accuracy: "Correct classification of attack types"
+  automated_grading: true
+  llm_judge_criteria:
+    - "Realism of attack scenarios"
+    - "Quality of evidence signals"
+    - "Challenge progression across difficulties"
+
+metadata:
+  real_world_references:
+    - "ua-parser-js hijack (October 2021)"
+    - "event-stream malicious dependency (November 2018)"
+    - "SolarWinds supply chain attack (December 2020)"
+  unique_features:
+    - "Pattern-based agent reasoning (no task hardcoding)"
+    - "Red herring packages in hard scenario"
+    - "Transitive dependency poisoning (4 levels deep)"
+    - "CI-triggered malicious behavior"

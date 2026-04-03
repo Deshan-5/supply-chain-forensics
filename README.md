@@ -2,7 +2,17 @@
 title: Supply Chain Forensics
 emoji: 🔍
 colorFrom: red
-colorTo: orange
+colorTo: red
+sdk: docker
+app_file: app.py
+pinned: false
+---
+
+---
+title: Supply Chain Forensics
+emoji: 🔍
+colorFrom: red
+colorTo: red
 sdk: docker
 app_file: app.py
 pinned: false
