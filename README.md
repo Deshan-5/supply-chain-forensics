@@ -1,3 +1,13 @@
+---
+title: Supply Chain Forensics
+emoji: 🔍
+colorFrom: red
+colorTo: orange
+sdk: docker
+app_file: app.py
+pinned: false
+---
+
 # Supply Chain Forensics
 
 OpenEnv benchmark. Agent investigates compromised dependencies.
