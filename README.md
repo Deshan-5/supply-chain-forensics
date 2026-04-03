@@ -1,5 +1,4 @@
 ---
-
 title: Supply Chain Forensics
 emoji: 🔍
 colorFrom: blue
@@ -9,166 +8,153 @@ app_port: 7860
 pinned: false
 ---
 
-# Supply Chain Attack Forensics Lab
+# Supply Chain Forensics
 
-> A benchmark for training AI agents to detect software supply chain attacks.
-> Built for OpenEnv Hackathon — Meta × Hugging Face × PyTorch
+AI agents are not ready for real-world security.
+
+This project is a benchmark to change that.
 
 ---
 
-## Why this exists
+## The problem
 
-Most systems today don’t get compromised through application code.
+Modern systems don’t get hacked at the application layer.
 
-They get compromised through dependencies.
+They get hacked through dependencies.
 
-We have tools for known vulnerabilities.
-We don’t have tools for reasoning about unknown ones.
+- A single compromised package can impact thousands of apps  
+- Most attacks don’t trigger CVEs  
+- Malicious behavior is often hidden, delayed, or environment-specific  
 
-AI agents today fail here.
+This pattern shows up repeatedly:
+
+- SolarWinds (2020) — build pipeline compromise  
+- Codecov (2021) — CI environment exfiltration  
+- XZ Utils (2024) — maintainer-level backdoor  
+- Axios NPM incident (2026) — package ecosystem compromise  
+
+The attack is not obvious.  
+The signal is buried.  
+Detection requires reasoning.
 
 ---
 
 ## What this is
 
-An OpenEnv environment where an agent investigates a compromised software project.
+Supply Chain Forensics is an OpenEnv environment where an agent investigates a compromised codebase.
 
-Each episode gives the agent:
+Each episode simulates a real supply chain attack using:
 
-* dependency manifests
-* package graphs
-* git history
-* maintainer metadata
-* CI/CD traces
-* network logs
+- package manifests  
+- dependency graphs  
+- publish history  
+- maintainer metadata  
+- install-time behavior  
+- network activity  
 
-The agent explores, identifies anomalies, and submits findings — under a fixed step budget.
+The agent must:
 
----
+1. explore the system  
+2. identify anomalies  
+3. trace the root cause  
+4. submit findings  
 
-## Tasks
-
-| Task   | Scenario                         |
-| ------ | -------------------------------- |
-| easy   | Typosquatted package (`lod-ash`) |
-| medium | Hijacked maintainer              |
-| hard   | Transitive dependency poisoning  |
-
-These are based on real attack patterns, not synthetic ones.
+All under a strict step budget.
 
 ---
 
-## Example
+## Why this matters
 
-```bash
-POST /reset → task=hard
-```
+Security tooling is optimized for known vulnerabilities.
 
-```json
-{
-  "packages": ["next", "react", "webpack-bundle-optimizer", "axios"]
-}
-```
+Attackers don’t use known vulnerabilities.
 
-```bash
-get_dependency_tree(depth=4)
-```
+They exploit trust:
+- package registries  
+- maintainers  
+- dependency graphs  
 
-```
-nexus-platform
-  → webpack-bundle-optimizer
-    → build-perf-metrics
-      → async-stat-collector
-```
+That makes detection a reasoning problem, not a lookup problem.
 
-```bash
-inspect_package("async-stat-collector")
-```
-
-Findings:
-
-* suspicious install script
-* reads local credentials
-* triggers only in CI
-
-```bash
-submit_findings(...)
-```
+This benchmark is designed to evaluate that gap.
 
 ---
 
-## API
+## Scenarios
 
-```
-POST /reset
-POST /step
-GET  /state/{session_id}
-GET  /health
-```
+| Task | Scenario | Signal |
+|------|----------|--------|
+| easy | Typosquat | name similarity + install behavior |
+| medium | Hijacked maintainer | publish anomaly + maintainer change |
+| hard | Transitive poisoning | deep dependency + CI-triggered behavior |
+| confusion | Dependency confusion | internal vs public package mismatch |
+
+Each scenario maps to real-world attack classes seen in modern ecosystems.
 
 ---
 
 ## How it works
 
-```
-Agent (inference.py)
-        ↓
-FastAPI server
-        ↓
-Environment core
-        ↓
-Scenario engine
-        ↓
-Grader
-```
+Agent → API → Environment → Scenario → Reward
+
+POST /reset  
+POST /step  
+GET /state/{session_id}  
+
+Observations are structured.  
+Evaluation is deterministic.  
+Scores are reproducible.
 
 ---
 
-## Scoring
+## Example
 
-* small penalty per step
-* reward for correct packages
-* reward for correct attack classification
-* bonus for efficiency
+A standard audit reports zero vulnerabilities.
 
-Final score ∈ [0, 1]
+The agent still finds:
 
----
+- a low-download package replacing an internal dependency  
+- an install script triggering outbound network calls  
+- behavior only active during install  
 
-## Run locally
+Final output:
 
-```bash
-pip install -r requirements.txt
-uvicorn app:app --host 0.0.0.0 --port 7860
-```
-
-```bash
-python inference.py
-```
+{
+  "packages": ["company-utils"],
+  "attack_vectors": {
+    "company-utils": "dependency_confusion"
+  }
+}
 
 ---
 
-## Docker
+## Running locally
 
-```bash
-docker build -t supply-chain-forensics .
-docker run -p 7860:7860 supply-chain-forensics
-```
+pip install -r requirements.txt  
+python3 -m uvicorn app:app --port 7860  
 
----
+Run agent:
 
-## What this enables
-
-* training agents for incident response
-* testing reasoning over dependency graphs
-* evaluating detection of novel supply chain attacks
+python3 inference.py  
 
 ---
 
-## References
+## Design
 
-SolarWinds (2020)
-Codecov (2021)
-Log4Shell (2021)
-XZ Utils (2024)
-Axios NPM compromise (2026)
+- behavior > signatures  
+- graph-first reasoning  
+- step constraints simulate real investigation pressure  
+- deterministic reward for consistent evaluation  
+- LLM-driven agent with fallback for stability  
+
+---
+
+## Bottom line
+
+Security tools detect known issues.
+
+Modern attacks avoid known issues.
+
+Agents need to reason.
+
+This is a benchmark for that.
