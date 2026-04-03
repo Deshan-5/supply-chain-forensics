@@ -1,140 +1,78 @@
----
-title: Supply Chain Forensics
-emoji: 🔍
-colorFrom: blue
-colorTo: purple
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # Supply Chain Forensics
 
-AI agents break the moment security stops being obvious.
+OpenEnv benchmark. Agent investigates compromised dependencies.
 
-This project is a benchmark for testing whether an agent can investigate software supply chain attacks the way a human analyst would: by following weak signals, checking provenance, and making decisions under pressure.
+## What
 
----
+Four scenarios. Agent gets a project with poisoned packages. Has to find which ones and classify the attack type. Scored on precision/recall.
 
-## Why this exists
+Attack types:
+- Typosquat (easy)
+- Hijacked maintainer (medium)  
+- Transitive poisoning (hard)
+- Dependency confusion (confusion)
 
-Most modern compromises don’t happen in application code.
+## Why
 
-They happen in dependencies.
+npm/PyPI attacks work because scanners only catch known CVEs. New attack patterns slip through. Investigation requires reasoning: correlate publish gaps with maintainer dormancy, trace dependency trees, spot namespace conflicts.
 
-A single malicious package can:
-- quietly enter through the dependency graph  
-- execute only under specific conditions (CI, install time, etc.)  
-- bypass traditional scanners entirely  
+This tests whether an agent can do that investigation.
 
-This pattern shows up repeatedly in incidents like SolarWinds, Codecov, the XZ backdoor, and recent npm ecosystem compromises.
+## How it works
 
-The attack is rarely obvious.  
-The signal is weak.  
-Detection requires reasoning.
+Agent calls actions. Each costs a step.
 
----
+Actions:
+- inspect_package(name)
+- check_publish_history(name)
+- check_maintainer(name)
+- trace_network(build_step)
+- get_dependency_tree(depth)
+- submit_findings(packages, vectors)
 
-## What this is
+Environment returns observations. Agent submits findings when ready.
 
-Supply Chain Forensics is an OpenEnv environment where an agent investigates a compromised project.
+Score = F1 on flagged packages + vector classification bonus - step penalty
 
-Each episode simulates a realistic supply chain attack using structured signals:
+## Run
 
-- package manifests  
-- dependency graphs  
-- publish history  
-- maintainer metadata  
-- install-time scripts  
-- network activity  
+```bash
+pip install -r requirements.txt
+uvicorn app:app --port 7860
+```
 
-The agent must:
-1. explore the system  
-2. identify anomalies  
-3. trace the root cause  
-4. submit findings  
-
-All under a fixed step budget.
-
----
+Agent:
+```bash
+export HF_TOKEN=key
+export MODEL_NAME=claude-sonnet-4-6
+python inference.py
+```
 
 ## Scenarios
 
-| Task | Scenario | What the agent must figure out |
-|------|----------|-------------------------------|
-| easy | Typosquat | a malicious package mimicking a popular one |
-| medium | Hijacked maintainer | legitimate package compromised after takeover |
-| hard | Transitive poisoning | malicious dependency hidden deep in the graph |
-| confusion | Dependency confusion | public package replacing an expected internal one |
+Based on real attacks:
+- ua-parser-js hijack (Oct 2021, 8M weekly DL)
+- event-stream backdoor (Nov 2018)
+- SolarWinds build compromise (Dec 2020)
 
-These are not synthetic puzzles.  
-They reflect real attack patterns seen in production ecosystems.
+Each scenario includes red herrings. Legitimate packages with minor anomalies mixed in.
 
----
+## Files
 
-## How the environment works
+```
+app.py                  # FastAPI server
+env/environment.py      # Core logic
+env/scenarios/*.json    # Attack data
+inference.py            # Baseline agent
+```
 
-The agent interacts with a simple API:
+## Expected scores
 
-POST /reset  
-POST /step  
-GET  /state/{session_id}  
+GPT-4o targets:
+- easy: 0.9-1.0
+- medium: 0.7-0.9
+- hard: 0.3-0.6
+- confusion: 0.5-0.8
 
-A typical loop:
+Hard scenario has 8 packages, 1 malicious, 2 red herrings with install scripts.
 
-observe → act → receive feedback → repeat → submit findings  
-
----
-
-## Example
-
-A project passes a standard audit with zero vulnerabilities.
-
-The agent still finds:
-
-- a low-download package replacing an internal dependency  
-- an install script making outbound network calls  
-- behavior triggered only during install  
-
-Final output:
-
-{
-  "packages": ["company-utils"],
-  "attack_vectors": {
-    "company-utils": "dependency_confusion"
-  }
-}
-
----
-
-## Running locally
-
-pip install -r requirements.txt  
-
-python3 -m uvicorn app:app --port 7860  
-
-Run the agent:
-
-python3 inference.py  
-
----
-
-## Design choices
-
-- Behavior over signatures  
-- Graph-first reasoning  
-- Step constraints simulate real investigation pressure  
-- Deterministic scoring  
-- LLM-driven agent with fallback  
-
----
-
-## Bottom line
-
-Security tools detect known issues.
-
-Modern attacks avoid known issues.
-
-Agents need to reason.
-
-This project is a benchmark for that.

