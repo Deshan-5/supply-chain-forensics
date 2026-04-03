@@ -60,12 +60,14 @@ TASK_MAP = {
     "easy":   "typosquat_detection",
     "medium": "hijacked_maintainer",
     "hard":   "transitive_dependency_poisoning",
+    "confusion": "confusion",
 }
 
 MAX_STEPS = {
     "easy":   12,
     "medium": 20,
     "hard":   30,
+    "confusion": 20,
 }
 
 # Small penalty per step — encourages efficient investigation

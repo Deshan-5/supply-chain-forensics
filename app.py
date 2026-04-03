@@ -75,8 +75,8 @@ def reset(req: ResetRequest):
     Returns session_id and initial observation (briefing + package manifest).
     """
     difficulty = req.task or "easy"
-    if difficulty not in ("easy", "medium", "hard"):
-        raise HTTPException(400, f"task must be 'easy', 'medium', or 'hard'. Got: '{difficulty}'")
+    if difficulty not in ("easy", "medium", "hard", "confusion"):
+        raise HTTPException(400, f"task must be 'easy', 'medium', 'hard', or 'confusion'. Got: '{difficulty}'")
 
     session_id = f"{difficulty}_{os.urandom(4).hex()}"
     env = SupplyChainEnv(difficulty=difficulty)
@@ -157,6 +157,19 @@ def list_tasks():
                 "difficulty": "hard",
                 "max_steps": 30,
                 "hints": "Direct deps look clean. Trace network logs. Explore the full dependency tree."
+            },
+            {
+                "id": "confusion",
+                "name": "Dependency Confusion",
+                "description": (
+                "A public package shadows an expected internal dependency and executes "
+                "unexpected install-time behavior."
+                ),
+                "difficulty": "medium",
+                "max_steps": 20,
+                "hints": "Compare expected internal package naming with what was actually installed."
             }
+            
         ]
     }
+

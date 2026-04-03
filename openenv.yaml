@@ -43,6 +43,15 @@ tasks:
     difficulty: hard
     score_range: [0.0, 1.0]
 
+    - id: confusion
+    name: Dependency Confusion
+    description: >
+      A public package shadows an expected internal dependency and executes
+      suspicious install-time behavior.
+    max_steps: 20
+    difficulty: medium
+    score_range: [0.0, 1.0]
+
 observation_space:
   type: dict
   properties:
