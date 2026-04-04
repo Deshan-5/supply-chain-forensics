@@ -96,7 +96,7 @@ class SupplyChainEnv:
         self._state: dict[str, Any] = {}
         self._reset()
 
-    # ── Public API ────────────────────────────────────────────────────────────
+    # public API
 
     def reset(self) -> StepResult:
         """Reset the environment to a fresh episode."""
@@ -161,7 +161,7 @@ class SupplyChainEnv:
             done=self._state["done"],
         )
 
-    # ── Action Dispatch ───────────────────────────────────────────────────────
+    #action dispatch
 
     def _dispatch(self, req: ActionRequest) -> tuple[Any, float]:
         """Route action to handler, return (result, bonus_reward)."""
@@ -184,7 +184,7 @@ class SupplyChainEnv:
             )
         return handlers[req.action](req.params)
 
-    # ── Action Handlers ───────────────────────────────────────────────────────
+    #Action handlers 
 
     def _action_list_packages(self, params: dict) -> tuple[Any, float]:
         """List all packages in the manifest."""
@@ -228,7 +228,6 @@ class SupplyChainEnv:
             "install_scripts": pkg.get("install_scripts", {}),
         }
 
-        # Include source preview if available
         if "source_preview" in pkg:
             result["source_preview"] = pkg["source_preview"]
 
@@ -367,7 +366,7 @@ class SupplyChainEnv:
                     "entries": []
                 }
 
-        # Bonus if agent finds flagged network requests
+        # Bonus if agent finds flagged network requests.
         flagged_found = any(e.get("flagged") for entries in logs.values() for e in entries)
         bonus = 0.08 if flagged_found and build_step == "all" else 0.05 if flagged_found else 0.0
         return result, bonus
@@ -471,7 +470,7 @@ class SupplyChainEnv:
             "breakdown": breakdown
         }, score  # The full score is the bonus reward on submission
 
-    # ── Grading ───────────────────────────────────────────────────────────────
+    #  Grading section 
 
     def _grade(self, flagged: list[str], vectors: dict[str, str]) -> tuple[float, dict]:
         """
@@ -526,7 +525,7 @@ class SupplyChainEnv:
             "total_score": round(total, 4)
         }
 
-    # ── Internal Helpers ──────────────────────────────────────────────────────
+    #Internal helpers
 
     def _reset(self):
         scenario_path = SCENARIOS_DIR / f"{self.difficulty}.json"

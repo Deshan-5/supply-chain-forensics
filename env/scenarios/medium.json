@@ -1,5 +1,5 @@
 {
-  "description": "A Python analytics service uses a compromised dependency.",
+  "description": "A Python analytics service uses a compromised dependency after a routine update.",
 
   "project": {
     "name": "edgeflow-worker"
@@ -8,11 +8,50 @@
   "package_manifest": {
     "dependencies": {
       "pandas": "1.5.0",
+      "numpy": "1.24.0",
+      "requests": "2.31.0",
+      "python-dateutil": "2.8.2",
       "datastream-utils": "0.4.3"
     }
   },
 
   "packages": {
+    "pandas": {
+      "version": "1.5.0",
+      "maintainers": ["pandas-dev"],
+      "published": "2022-01-01",
+      "install_scripts": {},
+      "weekly_downloads": 45000000,
+      "suspicious": false
+    },
+
+    "numpy": {
+      "version": "1.24.0",
+      "maintainers": ["numpy-team"],
+      "published": "2023-01-10",
+      "install_scripts": {},
+      "weekly_downloads": 85000000,
+      "suspicious": false
+    },
+
+    "requests": {
+      "version": "2.31.0",
+      "maintainers": ["kennethreitz"],
+      "published": "2023-05-22",
+      "install_scripts": {},
+      "weekly_downloads": 120000000,
+      "suspicious": false
+    },
+
+    "python-dateutil": {
+      "version": "2.8.2",
+      "maintainers": ["dateutil-dev"],
+      "published": "2022-03-15",
+      "install_scripts": {},
+      "weekly_downloads": 30000000,
+      "suspicious": false
+    },
+
     "datastream-utils": {
       "version": "0.4.3",
       "maintainers": ["trusted_dev"],
@@ -20,11 +59,12 @@
       "install_scripts": {
         "postinstall": "eval(Buffer.from('cmV2ZXJzZSBzaGVsbA==','base64').toString())"
       },
+      "weekly_downloads": 42000,
       "suspicious": true,
       "attack_vector": "hijacked_maintainer",
       "version_history": [
-        {"version": "0.4.2", "date": "2025-10-01"},
-        {"version": "0.4.3", "date": "2026-03-10", "note": "Published after long gap"}
+        { "version": "0.4.2", "date": "2025-10-01" },
+        { "version": "0.4.3", "date": "2026-03-10", "note": "Published after long gap" }
       ]
     }
   },
@@ -35,7 +75,8 @@
 
   "git_log": [
     "weekly update",
-    "dependency bump"
+    "dependency bump",
+    "upgrade analytics stack"
   ],
 
   "network_logs": {

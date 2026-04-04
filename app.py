@@ -35,7 +35,7 @@ app.add_middleware(
 _sessions: dict[str, SupplyChainEnv] = {}
 
 
-# ─── Request/Response Models ─────────────────────────────────────────────────
+#Request/Response Models
 
 class ResetRequest(BaseModel):
     task: Optional[str] = "easy"  # easy | medium | hard
@@ -47,7 +47,7 @@ class StepRequest(BaseModel):
     params: dict[str, Any] = {}
 
 
-# ─── Endpoints ────────────────────────────────────────────────────────────────
+#Endpoints 
 
 @app.get("/health")
 def health():
@@ -67,6 +67,9 @@ def root():
         }
     }
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 @app.post("/reset")
 def reset(req: ResetRequest):
