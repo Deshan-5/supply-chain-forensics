@@ -111,7 +111,7 @@ export ENV_BASE_URL=http://127.0.0.1:7860
 
 for task in easy medium hard confusion; do  
   SUPPLY_CHAIN_TASK=$task python3 inference.py  
-done  
+
 
 ---
 
@@ -119,4 +119,4 @@ done
 
 https://deshan-5-supply-chain-forensics.hf.space
 
-## Built for - Openenv X meta X pytorch X SST - Hackathon Round1
+## Built for - Openenv X meta X pytorch X SST - Hackathon
