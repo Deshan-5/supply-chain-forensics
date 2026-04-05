@@ -31,7 +31,7 @@ The agent must:
 - identify compromised packages
 - classify the attack vector
 
-The task is not pattern matching. It requires multi-step investigation across metadata, dependency structure, and runtime signals.
+The task isn't pattern matching. It requires multi step investigation across metadata, dependency structure, and runtime signals.
 
 ---
 
@@ -67,7 +67,7 @@ Each step returns:
 ## Tasks
 
 - easy — Typosquat detection  
-- medium — Maintainer compromise  
+- medium — Maintainer compromise 
 - hard — Transitive dependency poisoning  
 - confusion — Dependency confusion  
 
@@ -117,6 +117,7 @@ for task in easy medium hard confusion; do
 
 ## Deployment
 
-https://deshan-5-supply-chain-forensics.hf.space
+https://deshan-5-supply-chain-forensics.hf.space 
 
+done
 ## Built for - Openenv X meta X pytorch X SST - Hackathon
