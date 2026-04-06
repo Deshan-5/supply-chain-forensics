@@ -72,11 +72,13 @@ def health():
     return {"status": "ok"}
 
 @app.post("/reset")
-def reset(req: ResetRequest):
+def reset(req: Optional[ResetRequest] = None):
     """
     Start a new episode.
     Returns session_id and initial observation (briefing + package manifest).
     """
+    if req is None:
+        req = ResetRequest()
     difficulty = req.task or "easy"
     if difficulty not in ("easy", "medium", "hard", "confusion"):
         raise HTTPException(400, f"task must be 'easy', 'medium', 'hard', or 'confusion'. Got: '{difficulty}'")
@@ -175,4 +177,3 @@ def list_tasks():
             
         ]
     }
-
