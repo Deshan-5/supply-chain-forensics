@@ -5,17 +5,17 @@ from typing import Optional
 import requests
 from openai import OpenAI
 
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("HF_TOKEN")
-USE_LLM = bool(API_KEY and API_KEY != "dummy")
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+USE_LLM = bool(HF_TOKEN and HF_TOKEN != "dummy")
 
 TASK = os.getenv("SUPPLY_CHAIN_TASK", "easy")
 BENCHMARK = "supply-chain-forensics"
 MAX_STEPS = {"easy": 12, "medium": 20, "hard": 30, "confusion": 20}[TASK]
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:7860")
 
-client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY) if USE_LLM else None
+client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN) if USE_LLM else None
 
 VALID_ACTIONS = {
     "list_packages",
