@@ -67,9 +67,6 @@ def root():
         }
     }
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
 
 @app.post("/reset")
 def reset(req: Optional[ResetRequest] = None):
@@ -99,15 +96,16 @@ def reset(req: Optional[ResetRequest] = None):
 
 @app.post("/step")
 def step(req: StepRequest):
-    """
-    Execute one investigative action.
-    Returns updated observation, reward, and done flag.
-    """
     env = _sessions.get(req.session_id)
+
     if env is None:
         raise HTTPException(404, f"Session '{req.session_id}' not found. Call /reset first.")
 
-    action_request = ActionRequest(action=req.action, params=req.params)
+    action = req.action.strip()
+    if action.endswith("()"):
+        action = action[:-2]
+
+    action_request = ActionRequest(action=action, params=req.params)
     result = env.step(action_request)
 
     return {
