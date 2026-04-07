@@ -46,7 +46,6 @@ class StepRequest(BaseModel):
     action: str
     params: dict[str, Any] = {}
 
-
 #Endpoints 
 
 @app.get("/health")
@@ -175,3 +174,8 @@ def list_tasks():
             
         ]
     }
+
+
+def main():
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=7860)
