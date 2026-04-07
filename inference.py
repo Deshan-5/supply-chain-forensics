@@ -419,6 +419,7 @@ def main() -> None:
         print(f"[DEBUG] Fatal error: {exc}", flush=True)
 
     finally:
+        final_score = min(0.999, max(0.001, final_score))
         log_end(success=success, steps=steps_taken, score=final_score, rewards=rewards)
 
 

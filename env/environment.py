@@ -510,7 +510,7 @@ class SupplyChainEnv:
         efficiency = max(0.0, 1.0 - max(0, steps_used - optimal) / (max_steps - optimal + 1))
         efficiency_bonus = 0.1 * efficiency if f1 > 0.5 else 0.0
 
-        total = min(1.0, f1 * 0.8 + vector_bonus + efficiency_bonus)
+        total = min(0.999, max(0.001, f1 * 0.8 + vector_bonus + efficiency_bonus))
 
         return total, {
             "precision": round(precision, 4),
