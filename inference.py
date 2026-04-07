@@ -10,9 +10,8 @@ MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 USE_LLM = bool(HF_TOKEN and HF_TOKEN != "dummy")
 
-TASK = os.getenv("SUPPLY_CHAIN_TASK", "easy")
-BENCHMARK = "supply-chain-forensics"
-MAX_STEPS = {"easy": 12, "medium": 20, "hard": 30, "confusion": 20}[TASK]
+TASKS = os.getenv("SUPPLY_CHAIN_TASK", "easy,medium,hard,confusion").split(",")
+ALL_MAX_STEPS = {"easy": 12, "medium": 20, "hard": 30, "confusion": 20}
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:7860")
 
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN) if USE_LLM else None
@@ -353,9 +352,13 @@ def choose_action(task: str, step: int, observation: dict, history: list[dict]) 
         return rule_based_action(task, step, observation, history)
 
 
-def main() -> None:
+BENCHMARK = "supply-chain-forensics"
+
+
+def run_task(task: str) -> None:
+    max_steps = ALL_MAX_STEPS[task]
     effective_model = MODEL_NAME if USE_LLM else "rule-based"
-    log_start(task=TASK, env=BENCHMARK, model=effective_model)
+    log_start(task=task, env=BENCHMARK, model=effective_model)
 
     rewards: list[float] = []
     steps_taken = 0
@@ -364,21 +367,21 @@ def main() -> None:
     history: list[dict] = []
 
     try:
-        reset_resp = env_reset(TASK)
+        reset_resp = env_reset(task)
         session_id = reset_resp["session_id"]
         observation = reset_resp["observation"]
         done = reset_resp["done"]
 
-        for step in range(1, MAX_STEPS + 1):
+        for step in range(1, max_steps + 1):
             if done:
                 break
 
-            action, params = choose_action(TASK, step, observation, history)
+            action, params = choose_action(task, step, observation, history)
 
             try:
                 step_resp = env_step(session_id, action, params)
             except Exception:
-                action, params = rule_based_action(TASK, step, observation, history)
+                action, params = rule_based_action(task, step, observation, history)
                 step_resp = env_step(session_id, action, params)
 
             observation = step_resp["observation"]
@@ -421,6 +424,13 @@ def main() -> None:
     finally:
         final_score = min(0.999, max(0.001, final_score))
         log_end(success=success, steps=steps_taken, score=final_score, rewards=rewards)
+
+
+def main() -> None:
+    for task in TASKS:
+        task = task.strip()
+        if task in ALL_MAX_STEPS:
+            run_task(task)
 
 
 if __name__ == "__main__":
