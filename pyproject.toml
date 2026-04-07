@@ -19,6 +19,9 @@ dependencies = [
   "openenv-core==0.2.0"
 ]
 
+[project.scripts]
+server = "app:app"
+
 [tool.setuptools]
 packages = ["env", "server"]
 py-modules = ["app", "inference"]
