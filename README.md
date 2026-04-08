@@ -120,4 +120,4 @@ for task in easy medium hard confusion; do
 https://deshan-5-supply-chain-forensics.hf.space 
 
 done
-## Built for - Openenv X meta X pytorch X SST - Hackathon(Round 1)
+## Built for - Openenv X meta X pytorch X SST - Hackathon(Round 1).
