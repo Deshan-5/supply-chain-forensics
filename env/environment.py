@@ -1,6 +1,5 @@
 """
 Supply Chain Attack Forensics — Core Environment
-================================================
 OpenEnv-compliant environment where an AI agent investigates
 compromised software dependencies. Simulates real-world
 supply chain attacks: typosquats, hijacked maintainer accounts,
@@ -17,8 +16,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 
-# ─── Typed Models ────────────────────────────────────────────────────────────
-
+#Typed Models
 class ActionRequest(BaseModel):
     action: str = Field(..., description="Action name")
     params: dict[str, Any] = Field(default_factory=dict, description="Action parameters")
@@ -52,8 +50,7 @@ class StateResponse(BaseModel):
     done: bool
 
 
-# ─── Environment ─────────────────────────────────────────────────────────────
-
+# env
 SCENARIOS_DIR = Path(__file__).parent / "scenarios"
 
 TASK_MAP = {
@@ -96,7 +93,7 @@ class SupplyChainEnv:
         self._state: dict[str, Any] = {}
         self._reset()
 
-    # public API
+    # public api
 
     def reset(self) -> StepResult:
         """Reset the environment to a fresh episode."""
@@ -372,7 +369,7 @@ class SupplyChainEnv:
         return result, bonus
 
     def _action_check_similarity(self, params: dict) -> tuple[Any, float]:
-        """Check if a package name is similar to a known legitimate package."""
+        """Checks if a package name is similar to a known legitimate package."""
         name = self._require_param(params, "name")
         reference = params.get("reference", None)
 
@@ -470,8 +467,7 @@ class SupplyChainEnv:
             "breakdown": breakdown
         }, score  # The full score is the bonus reward on submission
 
-    #  Grading section 
-
+    # grading section
     def _grade(self, flagged: list[str], vectors: dict[str, str]) -> tuple[float, dict]:
         """
         Compute precision × recall on flagged packages.

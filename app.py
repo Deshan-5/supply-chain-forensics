@@ -1,6 +1,5 @@
 """
 Supply Chain Forensics — FastAPI Server
-=======================================
 OpenEnv-compliant HTTP API. Deployed to Hugging Face Spaces.
 """
 
