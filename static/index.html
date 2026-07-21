@@ -6,390 +6,315 @@
 <title>Supply Chain Attack Forensics Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#070A0E;
-    --ink-2:#0A0F15;
-    --panel:#0E141B;
-    --panel-2:#0B1017;
-    --line:#1B2532;
-    --line-soft:#131B24;
-    --text:#CAD6E1;
-    --muted:#6A7C8E;
-    --dim:#3C4A58;
-    --faint:#28323D;
-    --amber:#FFB627;
-    --amber-2:#FFCB5C;
-    --amber-soft:rgba(255,182,39,.13);
-    --alert:#FF4D57;
-    --alert-soft:rgba(255,77,87,.13);
-    --teal:#2DE0C5;
-    --teal-soft:rgba(45,224,197,.11);
-    --disp:"Space Grotesk",system-ui,sans-serif;
-    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
-    --sans:"Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --bg:#0B0C0E;
+    --surface:#131519;
+    --surface-2:#0F1114;
+    --raise:#181B20;
+    --line:#22262C;
+    --line-2:#191D22;
+    --text:#E8E4DB;        /* warm dossier off-white */
+    --muted:#8A9099;
+    --dim:#565E68;
+    --faint:#333A42;
+    --red:#FF4438;         /* evidence / hazard — the only accent */
+    --red-deep:#C7362C;
+    --red-soft:rgba(255,68,56,.11);
+    --sage:#8FB08A;        /* "cleared" — muted, used sparingly */
+    --sage-soft:rgba(143,176,138,.10);
+    --disp:"Archivo",system-ui,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
   }
-
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-  body{
-    margin:0;
-    background:var(--ink);
-    color:var(--text);
-    font-family:var(--sans);
-    line-height:1.62;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  a{color:inherit}
-  .wrap{max-width:1020px;margin:0 auto;padding:0 24px}
-
-  /* ambient field */
-  .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
-  .bg .glow{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5}
-  .bg .g1{width:640px;height:640px;top:-260px;right:-160px;background:radial-gradient(circle,rgba(255,182,39,.10),transparent 68%)}
-  .bg .g2{width:560px;height:560px;bottom:-240px;left:-180px;background:radial-gradient(circle,rgba(45,224,197,.08),transparent 68%)}
-  .bg .grid{position:absolute;inset:0;opacity:.4;
-    background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
-    background-size:64px 64px;
-    -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 20%,transparent 75%);
-            mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 20%,transparent 75%);}
-  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
-    background:repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
-
-  main,.topbar{position:relative;z-index:1}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--disp);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   .mono{font-family:var(--mono)}
+  .num{font-variant-numeric:tabular-nums}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+  ::selection{background:var(--red);color:#fff}
 
-  /* ── boot overlay ── */
-  #boot{position:fixed;inset:0;z-index:100;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px}
-  #boot .bl{font-family:var(--mono);font-size:12px;letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
-  #boot .bl b{color:var(--amber)}
-  #boot .track{width:200px;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
-  #boot .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--teal));animation:boot 1.05s ease forwards}
-  @keyframes boot{to{width:100%}}
-  body.booted #boot{opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s}
+  /* ── status rail ── */
+  .rail{border-bottom:1px solid var(--line);background:var(--surface-2);position:sticky;top:0;z-index:30}
+  .rail .wrap{display:flex;align-items:center;gap:0;height:46px;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em}
+  .rail .seg{padding:0 16px;height:100%;display:flex;align-items:center;gap:8px;border-right:1px solid var(--line-2);color:var(--muted);white-space:nowrap}
+  .rail .seg:first-child{padding-left:0;color:var(--text);font-weight:600;letter-spacing:.02em}
+  .rail .live{margin-left:auto;border-right:none;border-left:1px solid var(--line-2);color:var(--sage)}
+  .rail b{color:var(--text);font-weight:500}
+  .rail .rec{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 var(--red);animation:rec 2s ease-out infinite}
+  @keyframes rec{0%{box-shadow:0 0 0 0 rgba(255,68,56,.5)}70%{box-shadow:0 0 0 6px rgba(255,68,56,0)}100%{box-shadow:0 0 0 0 rgba(255,68,56,0)}}
+  .rail .seg.mob{display:none}
+  @media(max-width:720px){.rail .seg.hide{display:none}.rail .live{font-size:10.5px}}
 
-  /* stagger reveal */
-  .rise{opacity:0;transform:translateY(16px)}
-  body.booted .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
-  @keyframes rise{to{opacity:1;transform:none}}
-  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
-  .reveal.in{opacity:1;transform:none}
+  /* ── masthead ── */
+  header{padding:40px 0 8px}
+  .kick{font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--red);margin:0 0 16px;display:flex;align-items:center;gap:10px}
+  .kick::before{content:"";width:18px;height:18px;border:1.5px solid var(--red);border-radius:2px;display:inline-block;position:relative}
+  h1{font-family:var(--disp);font-weight:800;font-size:clamp(32px,6.4vw,60px);line-height:.98;letter-spacing:-.03em;margin:0 0 18px;color:#F4F1E9;max-width:16ch}
+  h1 em{font-style:normal;color:var(--red)}
+  .sub{font-size:clamp(15px,2.1vw,17.5px);color:var(--muted);max-width:60ch;margin:0 0 4px;line-height:1.5}
+  .sub b{color:var(--text);font-weight:600}
+  .sub code{font-family:var(--mono);font-size:.88em;color:var(--text);background:var(--raise);border:1px solid var(--line);padding:0 5px;border-radius:3px}
 
-  /* ── chips ── */
-  .tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;padding:3px 9px;border:1px solid var(--line);border-radius:2px;color:var(--muted)}
-  .tag.amber{color:var(--amber);border-color:rgba(255,182,39,.35);background:var(--amber-soft)}
-  .tag.alert{color:var(--alert);border-color:rgba(255,77,87,.38);background:var(--alert-soft)}
-  .tag.teal{color:var(--teal);border-color:rgba(45,224,197,.35);background:var(--teal-soft)}
-  .dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
-  .pulse{animation:pulse 1.8s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  /* ── the workstation ── */
+  .station{display:grid;grid-template-columns:1fr 300px;gap:14px;margin:30px 0 8px;align-items:stretch}
+  @media(max-width:860px){.station{grid-template-columns:1fr}}
 
-  /* ── topbar ── */
-  .topbar{border-bottom:1px solid var(--line);background:rgba(7,10,14,.72);position:sticky;top:0;z-index:40;backdrop-filter:blur(10px)}
-  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:54px;gap:16px}
-  .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;letter-spacing:.05em;font-weight:500}
-  .brand .shield{color:var(--amber);font-size:15px}
-  .topbar .meta{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.09em;display:flex;gap:20px;align-items:center}
-  .topbar .meta b{color:var(--teal);font-weight:500}
-  @media(max-width:640px){.topbar .meta .hide{display:none}}
+  .console{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:0 30px 60px -40px #000}
+  .chrome{display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--surface);font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.05em;flex:none}
+  .chrome .fn{width:9px;height:9px;border-radius:2px;background:var(--faint)}
+  .chrome .fn.on{background:var(--red)}
+  .chrome .path{color:var(--muted)}
+  .chrome .sid{margin-left:auto;color:var(--dim)}
 
-  /* ── hero ── */
-  header.hero{padding:70px 0 46px}
-  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin:0 0 22px;display:flex;align-items:center;gap:12px}
-  .eyebrow::before{content:"";width:30px;height:1px;background:linear-gradient(90deg,var(--amber),transparent)}
-  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,7vw,66px);line-height:1.02;letter-spacing:-.02em;margin:0 0 24px;color:#EEF4FA}
-  h1 .flag{color:var(--alert);position:relative;white-space:nowrap}
-  h1 .flag::after{content:"";position:absolute;left:0;right:0;bottom:.08em;height:2px;background:var(--alert);opacity:.5}
-  .lede{font-size:clamp(16px,2.3vw,18.5px);color:var(--text);max-width:62ch;margin:0}
-  .lede .sub{color:var(--muted)}
-  .lede code{font-family:var(--mono);font-size:.9em;color:var(--amber-2);background:var(--amber-soft);padding:1px 6px;border-radius:3px}
+  .screen{font-family:var(--mono);font-size:13px;line-height:1.72;padding:14px 16px;height:390px;overflow-y:auto;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--faint) transparent}
+  .screen::-webkit-scrollbar{width:8px;height:8px}.screen::-webkit-scrollbar-thumb{background:var(--faint);border-radius:8px}
+  .screen .row{white-space:pre;color:var(--text)}
+  .screen .cmd{color:#F4F1E9}
+  .screen .cmd .p{color:var(--red);font-weight:600}
+  .screen .m{color:var(--muted)}
+  .screen .d{color:var(--dim)}
+  .screen .r{color:var(--red)}
+  .screen .ok{color:var(--sage)}
+  .screen .hd{color:var(--muted);letter-spacing:.04em}
+  .screen .bad{color:#FF6B62}
+  .screen .flag{color:var(--red);font-weight:600}
+  .line{animation:ln .26s ease both}
+  @keyframes ln{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+  .caret{display:inline-block;width:8px;height:15px;background:var(--red);vertical-align:-3px;margin-left:3px;animation:bl 1.05s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
 
-  .hero-grid{display:grid;grid-template-columns:1.06fr .94fr;gap:34px;align-items:start;margin-top:38px}
-  @media(max-width:840px){.hero-grid{grid-template-columns:1fr;gap:26px}}
+  .prompt{display:flex;align-items:center;gap:8px;padding:11px 16px;border-top:1px solid var(--line);background:var(--surface);font-family:var(--mono);font-size:13px;flex:none}
+  .prompt .p{color:var(--red);font-weight:600}
+  .prompt input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:13px;caret-color:var(--red)}
+  .prompt input::placeholder{color:var(--dim)}
 
-  /* ── signature: live audit ── */
-  .scanner{border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,var(--panel),var(--panel-2));overflow:hidden;box-shadow:0 30px 70px -34px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.03);position:relative}
-  .scanner .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--panel-2);font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.07em}
-  .scanner .bar .fn{margin-left:auto;color:var(--dim)}
-  .light{width:9px;height:9px;border-radius:50%;background:var(--faint)}
-  .light.a{background:var(--alert)}.light.b{background:var(--amber)}.light.c{background:var(--teal)}
-  .code{font-family:var(--mono);font-size:12.5px;line-height:1;padding:12px 14px 14px;position:relative}
-  .code .ln{display:flex;align-items:center;gap:12px;white-space:nowrap;padding:7px 8px;border-radius:4px;position:relative;transition:background .25s}
-  .code .num{color:var(--faint);user-select:none;width:14px;text-align:right;flex:none}
-  .k{color:var(--muted)}.s{color:var(--teal)}.pkg{color:var(--text)}
-  .stat{margin-left:auto;font-size:10px;letter-spacing:.12em;padding:2px 7px;border-radius:2px;border:1px solid transparent;opacity:0;transform:scale(.9);transition:opacity .25s,transform .25s}
-  .stat.show{opacity:1;transform:none}
-  .stat.clean{color:var(--teal);border-color:rgba(45,224,197,.35);background:var(--teal-soft)}
-  .stat.bad{color:var(--alert);border-color:rgba(255,77,87,.4);background:var(--alert-soft)}
-  .code .ln.hot{background:rgba(255,182,39,.06)}
-  .code .ln.compromised{background:var(--alert-soft);box-shadow:inset 2px 0 0 var(--alert)}
-  .code .ln.compromised .pkg,.code .ln.compromised .s{color:#FFB4B8}
-  .sweep{position:absolute;left:8px;right:8px;height:30px;top:12px;pointer-events:none;opacity:0;
-    background:linear-gradient(180deg,transparent,rgba(255,182,39,.16),transparent);
-    border-top:1px solid rgba(255,182,39,.55);box-shadow:0 0 26px rgba(255,182,39,.3)}
-  .verdict{display:flex;align-items:center;gap:10px;padding:12px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--muted);background:var(--panel-2);min-height:44px}
-  .verdict .vv{color:var(--dim)}
-  .verdict.done .vv{color:var(--text)}
-  .verdict b{color:var(--alert);font-weight:600}
-  .caret{display:inline-block;width:7px;height:13px;background:var(--amber);margin-left:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite}
-  @keyframes blink{50%{opacity:0}}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .chip{font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--text);background:var(--raise);border:1px solid var(--line);border-radius:5px;padding:7px 11px;cursor:pointer;transition:border-color .15s,background .15s,transform .1s;user-select:none}
+  .chip:hover{border-color:var(--red);background:var(--red-soft)}
+  .chip:active{transform:translateY(1px)}
+  .chip .fx{color:var(--dim)}
+  .chip[data-armed="1"]{border-color:var(--red);color:#fff;background:var(--red-deep)}
+  .chip[data-armed="1"] .fx{color:rgba(255,255,255,.6)}
+  .chip.replay{margin-left:auto;color:var(--muted)}
 
-  /* hero side facts */
-  .facts{display:flex;flex-direction:column;gap:13px}
-  .fact{border:1px solid var(--line);border-left:2px solid var(--amber);border-radius:5px;padding:15px 17px;background:var(--panel);transition:transform .2s,border-color .2s}
-  .fact:hover{transform:translateX(3px)}
-  .fact h3{margin:0 0 5px;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber)}
-  .fact p{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
-  .fact p b{color:var(--text);font-weight:600}
+  /* evidence ledger */
+  .ledger{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);display:flex;flex-direction:column;overflow:hidden}
+  .ledger .lh{display:flex;align-items:center;justify-content:space-between;height:40px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--surface);font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);flex:none}
+  .ledger .lh .ct{color:var(--red);font-weight:600}
+  .ev-list{padding:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;min-height:120px}
+  .ev-empty{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:center;padding:34px 12px;line-height:1.7}
+  .ev-empty span{display:block;color:var(--faint);font-size:22px;margin-bottom:8px}
+  .ev{border:1px solid var(--line);border-left:2px solid var(--red);border-radius:4px;padding:9px 11px;background:var(--raise);animation:evin .35s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes evin{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+  .ev .id{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--red);margin-bottom:3px}
+  .ev .tx{font-size:12.5px;color:var(--text);line-height:1.4}
+  .ledger .lf{border-top:1px solid var(--line);padding:11px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);flex:none;text-align:center}
+  .ledger .lf.ready{color:var(--sage)}
 
-  /* ── section frame ── */
-  section{padding:58px 0;border-top:1px solid var(--line-soft);position:relative}
-  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:30px;flex-wrap:wrap}
-  .sec-num{font-family:var(--mono);font-size:12px;color:var(--amber);letter-spacing:.1em;border:1px solid var(--line);border-radius:3px;padding:3px 8px}
-  .sec-head h2{font-family:var(--disp);font-weight:600;font-size:clamp(21px,3.4vw,28px);letter-spacing:-.01em;margin:0;color:#EEF4FA}
-  .sec-head p{margin:0;color:var(--muted);font-size:14px;flex:1 1 240px}
+  /* CASE CLOSED stamp */
+  .stamp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5;opacity:0}
+  .stamp.show{opacity:1;animation:stampin .5s cubic-bezier(.2,1.3,.4,1) both}
+  @keyframes stampin{0%{transform:scale(1.9) rotate(-14deg);opacity:0}55%{opacity:1}100%{transform:scale(1) rotate(-9deg);opacity:1}}
+  .stamp .box{border:3px solid var(--red);color:var(--red);border-radius:6px;padding:12px 22px;font-family:var(--disp);font-weight:800;letter-spacing:.06em;font-size:clamp(22px,4vw,34px);text-transform:uppercase;background:rgba(11,12,14,.55);box-shadow:0 0 0 6px rgba(255,68,56,.08);text-align:center;line-height:1.1}
+  .stamp .box small{display:block;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.18em;color:var(--text);margin-top:6px}
+  .shake{animation:shake .34s ease}
+  @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,1px)}}
 
-  /* case files */
-  .cases{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-  @media(max-width:640px){.cases{grid-template-columns:1fr}}
-  .case{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:22px;position:relative;overflow:hidden;transition:border-color .25s,transform .25s,box-shadow .25s}
-  .case::before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:var(--dim);transition:background .25s}
-  .case::after{content:"";position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none;background:radial-gradient(340px 160px at var(--mx,50%) 0%,rgba(255,182,39,.07),transparent 70%)}
-  .case:hover{border-color:#2a3644;transform:translateY(-3px);box-shadow:0 20px 44px -28px rgba(0,0,0,.9)}
-  .case:hover::after{opacity:1}
-  .case[data-lv="easy"]::before{background:var(--teal)}
-  .case[data-lv="medium"]::before{background:var(--amber)}
-  .case[data-lv="hard"]::before{background:var(--alert)}
-  .case .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .case .id{font-family:var(--mono);font-size:11px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase}
-  .case h3{margin:0 0 9px;font-family:var(--disp);font-size:18px;color:#EEF4FA;font-weight:600;letter-spacing:-.01em}
-  .case p{margin:0 0 15px;font-size:13.5px;color:var(--muted);line-height:1.56}
-  .case .foot{display:flex;gap:18px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.05em;border-top:1px solid var(--line-soft);padding-top:13px}
-  .case .foot b{color:var(--text);font-weight:500}
+  /* ── generic section ── */
+  section{padding:52px 0;border-top:1px solid var(--line-2)}
+  .lead{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .lead .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);border-bottom:2px solid var(--red);padding-bottom:2px}
+  .lead h2{font-family:var(--disp);font-weight:700;font-size:clamp(20px,3vw,26px);letter-spacing:-.02em;margin:0;color:#F4F1E9}
+  .lead p{margin:0;color:var(--muted);font-size:13.5px;flex:1 1 220px}
 
-  /* baseline meters */
-  .baseline{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-  @media(max-width:640px){.baseline{grid-template-columns:repeat(2,1fr)}}
-  .meter{border:1px solid var(--line);border-radius:7px;padding:16px;background:var(--panel)}
-  .meter .lbl{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
-  .meter .val{font-family:var(--disp);font-size:22px;font-weight:600;color:#EEF4FA;font-variant-numeric:tabular-nums}
-  .meter .bar{height:5px;background:var(--line);border-radius:4px;overflow:hidden}
-  .meter .bar i{display:block;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--amber));transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
-  .meter.in .bar i{width:var(--w)}
+  /* case registry — dense table */
+  .registry{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface-2)}
+  .registry .hr,.registry .rr{display:grid;grid-template-columns:96px 1.4fr 1.5fr 78px 74px;gap:14px;align-items:center;padding:13px 16px;font-family:var(--mono);font-size:12.5px}
+  .registry .hr{background:var(--surface);color:var(--dim);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+  .registry .rr{border-top:1px solid var(--line-2);cursor:default;transition:background .14s}
+  .registry .rr:first-of-type{border-top:none}
+  .registry .rr:hover{background:var(--raise)}
+  .registry .cid{color:var(--red);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:11px}
+  .registry .cnm{color:var(--text);font-family:var(--disp);font-weight:600;font-size:14.5px}
+  .registry .cnm small{display:block;font-family:var(--mono);font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px;letter-spacing:0}
+  .registry .cvec{color:var(--muted)}
+  .registry .cbud{color:var(--text)}
+  .diff{display:inline-flex;gap:3px}
+  .diff i{width:7px;height:12px;background:var(--faint);border-radius:1px}
+  .diff i.on{background:var(--red)}
+  @media(max-width:760px){
+    .registry .hr{display:none}
+    .registry .rr{grid-template-columns:1fr auto;gap:6px 12px;padding:14px 16px}
+    .registry .cvec{grid-column:1;color:var(--dim);font-size:11.5px}
+    .registry .cbud{grid-column:2;grid-row:2;text-align:right}
+    .registry .cid{grid-column:1;grid-row:1}
+    .registry .cnm{grid-column:1;grid-row:1;margin-top:18px}
+    .registry .diff{grid-column:2;grid-row:1;justify-self:end}
+  }
 
-  /* toolkit */
-  .toolkit{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 24px}
-  @media(max-width:640px){.toolkit{grid-template-columns:1fr}}
-  .tool{display:flex;gap:12px;align-items:baseline;padding:12px 6px;border-bottom:1px solid var(--line-soft);transition:padding-left .2s}
-  .tool:hover{padding-left:12px}
-  .tool code{font-family:var(--mono);font-size:13px;color:var(--amber);flex:none;transition:color .2s}
-  .tool:hover code{color:var(--amber-2)}
-  .tool span{font-size:13px;color:var(--muted)}
+  /* toolkit reference */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 32px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .ref{display:flex;gap:12px;align-items:baseline;padding:11px 2px;border-bottom:1px solid var(--line-2);font-size:13px}
+  .ref code{font-family:var(--mono);font-size:12.5px;color:var(--red);flex:none}
+  .ref span{color:var(--muted)}
+  .vecs{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .vecs .v{font-family:var(--mono);font-size:12px;color:var(--text);border:1px solid var(--line);border-radius:4px;padding:7px 11px;background:var(--surface-2)}
+  .vecs .v::before{content:"›";color:var(--red);margin-right:7px}
 
-  .vectors{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-  .vec{font-family:var(--mono);font-size:12.5px;letter-spacing:.03em;color:var(--text);border:1px solid var(--line);border-radius:4px;padding:8px 13px;background:var(--panel);transition:border-color .2s,color .2s,background .2s}
-  .vec::before{content:"▸ ";color:var(--alert)}
-  .vec:hover{border-color:rgba(255,77,87,.4);background:var(--alert-soft)}
-
-  /* connect */
-  .connect{display:grid;grid-template-columns:1.12fr .88fr;gap:26px;align-items:start}
+  /* endpoints + curl */
+  .connect{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
   @media(max-width:760px){.connect{grid-template-columns:1fr}}
-  .terminal{border:1px solid var(--line);border-radius:8px;background:var(--panel-2);overflow:hidden;box-shadow:0 24px 56px -34px rgba(0,0,0,.9)}
-  .terminal .bar{display:flex;gap:7px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dim)}
-  .terminal .bar span.t{margin-left:6px}
-  .terminal pre{margin:0;padding:17px;font-family:var(--mono);font-size:12.5px;line-height:1.9;color:var(--text);overflow-x:auto}
-  .terminal .cm{color:var(--muted)}.terminal .pr{color:var(--amber)}.terminal .st{color:var(--teal)}.terminal .kv{color:var(--amber-2)}
-  .endpoints{display:flex;flex-direction:column;gap:8px}
-  .ep{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:5px;padding:12px 14px;background:var(--panel);font-family:var(--mono);font-size:12.5px;transition:border-color .2s,transform .2s}
-  .ep:hover{border-color:#2a3644;transform:translateX(3px)}
-  .ep .verb{flex:none;width:44px;font-weight:600;letter-spacing:.03em}
-  .ep .verb.post{color:var(--amber)}.ep .verb.get{color:var(--teal)}
-  .ep .path{color:var(--text)}
-  .ep .desc{margin-left:auto;color:var(--dim);font-family:var(--sans);font-size:12px}
-  @media(max-width:640px){.ep .desc{display:none}}
+  .eps{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface-2)}
+  .ep{display:flex;align-items:center;gap:12px;padding:12px 15px;border-top:1px solid var(--line-2);font-family:var(--mono);font-size:12.5px}
+  .ep:first-child{border-top:none}
+  .ep .vb{flex:none;width:42px;font-weight:600}
+  .ep .vb.p{color:var(--red)}.ep .vb.g{color:var(--sage)}
+  .ep .pt{color:var(--text)}
+  .ep .ds{margin-left:auto;color:var(--dim);font-family:var(--disp);font-size:12.5px}
+  @media(max-width:520px){.ep .ds{display:none}}
+  .curl{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);overflow:hidden}
+  .curl .ch{height:38px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em}
+  .curl pre{margin:0;padding:15px;font-family:var(--mono);font-size:12.5px;line-height:1.85;overflow-x:auto;color:var(--text)}
+  .curl .c{color:var(--dim)}.curl .p{color:var(--red)}.curl .s{color:var(--sage)}.curl .k{color:var(--text)}
 
-  /* footer */
-  footer{border-top:1px solid var(--line);padding:48px 0 62px;margin-top:6px}
-  footer .lg{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:20px}
-  .incidents{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:7px;overflow:hidden;margin-bottom:30px}
-  @media(max-width:640px){.incidents{grid-template-columns:repeat(2,1fr)}}
-  .inc{background:var(--panel-2);padding:17px;transition:background .2s}
-  .inc:hover{background:var(--panel)}
-  .inc .nm{font-family:var(--mono);font-size:13px;color:var(--text);margin-bottom:3px}
-  .inc .ds{font-size:12px;color:var(--dim)}
-  .foot-b{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.05em}
-  .foot-b a{color:var(--amber);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
-  .foot-b a:hover{border-color:var(--amber)}
+  /* footer / archive */
+  footer{border-top:1px solid var(--line);padding:38px 0 54px}
+  .arch{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-2);border:1px solid var(--line-2);border-radius:8px;overflow:hidden;margin-bottom:26px}
+  @media(max-width:600px){.arch{grid-template-columns:repeat(2,1fr)}}
+  .ac{background:var(--surface-2);padding:15px 16px}
+  .ac .n{font-family:var(--mono);font-size:13px;color:var(--text)}
+  .ac .c{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:3px;letter-spacing:.04em}
+  .fb{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.05em}
+  .fb a{color:var(--red);text-decoration:none}
+  .fb a:hover{text-decoration:underline}
 
-  :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:2px}
+  :focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:2px}
 
   @media(prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}
-    *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
-    .rise,.reveal{opacity:1!important;transform:none!important}
-    #boot{display:none}
+    *{animation-duration:.001ms!important;transition-duration:.001ms!important}
   }
 </style>
 </head>
 <body>
 
-<div id="boot" aria-hidden="true">
-  <div class="bl">◈ Forensic session <b>initializing</b></div>
-  <div class="track"><i></i></div>
-</div>
-
-<div class="bg" aria-hidden="true">
-  <div class="glow g1"></div><div class="glow g2"></div><div class="grid"></div>
-</div>
-
-<div class="topbar">
+<div class="rail">
   <div class="wrap">
-    <div class="brand"><span class="shield">◈</span> SUPPLY&nbsp;CHAIN&nbsp;FORENSICS</div>
-    <div class="meta mono">
-      <span class="hide">OPENENV&nbsp;·&nbsp;DOCKER</span>
-      <span><span class="dot pulse" style="color:var(--teal);display:inline-block;margin-right:6px"></span>STATUS&nbsp;<b>ONLINE</b></span>
-    </div>
+    <div class="seg">◈ SC-FORENSICS</div>
+    <div class="seg mono hide">CASE&nbsp;<b>#SC-2026-0331</b></div>
+    <div class="seg mono hide">CLEARANCE&nbsp;<b>RESTRICTED</b></div>
+    <div class="seg live mono"><span class="rec"></span>LIVE&nbsp;<b id="clock">--:--:--</b>&nbsp;UTC</div>
   </div>
 </div>
 
-<main>
-<header class="hero">
+<header>
   <div class="wrap">
-    <p class="eyebrow rise" style="--d:.05s">Incident Response Environment</p>
-    <h1 class="rise" style="--d:.12s">Trace the compromise.<br>Name the <span class="flag">attack vector.</span></h1>
-    <p class="lede rise" style="--d:.2s">An OpenEnv benchmark that drops an AI agent into a live investigation of poisoned software dependencies —
-      <span class="sub">typosquats, hijacked maintainers, and backdoors buried deep in the tree that <code>npm audit</code> will never flag.</span></p>
+    <p class="kick">Supply Chain Attack Forensics Lab</p>
+    <h1>A backdoor got in. <em>Find how.</em></h1>
+    <p class="sub">An OpenEnv benchmark where an agent investigates poisoned software dependencies — hijacked maintainers, typosquats, and backdoors buried deep in the tree that <code>npm audit</code> never flags. <b>Run the investigation below.</b></p>
 
-    <div class="hero-grid">
-      <!-- SIGNATURE: live audit -->
-      <div class="scanner rise" style="--d:.3s" id="scanner" aria-label="Simulated live dependency audit">
-        <div class="bar">
-          <span class="light a"></span><span class="light b"></span><span class="light c"></span>
-          <span>package.json — live audit</span>
-          <span class="fn" id="sess">SESSION medium_a7f3</span>
+    <div class="station">
+      <!-- INTERACTIVE CONSOLE -->
+      <div class="console" id="console">
+        <div class="chrome">
+          <span class="fn on"></span><span class="fn"></span><span class="fn"></span>
+          <span class="path">forensics://case/medium — hijacked_maintainer</span>
+          <span class="sid" id="sid">sess medium_a7f3</span>
         </div>
-        <div class="code" aria-hidden="true">
-          <div class="sweep" id="sweep"></div>
-          <div class="ln" data-pkg><span class="num">1</span><span class="k">"dependencies": {</span></div>
-          <div class="ln" data-pkg="clean"><span class="num">2</span><span class="pkg">"react"</span><span class="k">:</span>&nbsp;<span class="s">"^18.2.0"</span><span class="stat clean">CLEAN</span></div>
-          <div class="ln" data-pkg="clean"><span class="num">3</span><span class="pkg">"lodash"</span><span class="k">:</span>&nbsp;<span class="s">"^4.17.21"</span><span class="stat clean">CLEAN</span></div>
-          <div class="ln" data-pkg="bad"><span class="num">4</span><span class="pkg">"axios"</span><span class="k">:</span>&nbsp;<span class="s">"1.7.9"</span><span class="stat bad">COMPROMISED</span></div>
-          <div class="ln" data-pkg="clean"><span class="num">5</span><span class="pkg">"express"</span><span class="k">:</span>&nbsp;<span class="s">"^4.19.2"</span><span class="stat clean">CLEAN</span></div>
-          <div class="ln" data-pkg="clean"><span class="num">6</span><span class="pkg">"chalk"</span><span class="k">:</span>&nbsp;<span class="s">"^5.3.0"</span><span class="stat clean">CLEAN</span></div>
-          <div class="ln" data-pkg><span class="num">7</span><span class="k">}</span></div>
+        <div class="screen" id="screen" tabindex="0" aria-label="Forensic investigation console"></div>
+        <div class="prompt">
+          <span class="p">agent&gt;</span>
+          <input id="cin" autocomplete="off" spellcheck="false" placeholder="type an action, or tap one below — e.g. inspect axios" aria-label="Command input">
         </div>
-        <div class="verdict" id="verdict">
-          <span class="dot" style="color:var(--dim)"></span>
-          <span class="vv" id="vtext">auditing dependencies<span class="caret"></span></span>
-        </div>
+        <div class="stamp" id="stamp"><div class="box">Case Closed<small id="stampscore">SCORE 0.90</small></div></div>
       </div>
 
-      <div class="facts">
-        <div class="fact reveal" style="--d:.0s"><h3>The problem</h3><p>The attack is never a known CVE. It emerges through <b>behavior, context, and relationships</b> — exactly what scanners miss.</p></div>
-        <div class="fact reveal" style="--d:.08s"><h3>The task</h3><p>Given a project, a toolkit, and a <b>limited step budget</b>, the agent finds compromised packages and classifies how they got in.</p></div>
-        <div class="fact reveal" style="--d:.16s"><h3>Scored on</h3><p><b>F1</b> for detection + a bonus for the right vector, minus a step penalty. Baselines land near <b>0.88–0.90</b>.</p></div>
+      <!-- EVIDENCE LEDGER -->
+      <div class="ledger">
+        <div class="lh">Evidence<span class="ct"><span id="evct">0</span> logged</span></div>
+        <div class="ev-list" id="evlist">
+          <div class="ev-empty" id="evempty"><span>⌗</span>No evidence yet.<br>Investigate the manifest to collect it.</div>
+        </div>
+        <div class="lf" id="evfoot">awaiting findings</div>
       </div>
+    </div>
+
+    <div class="chips" id="chips">
+      <button class="chip" data-cmd="list_packages"><span class="fx">›</span> list_packages</button>
+      <button class="chip" data-cmd="inspect axios"><span class="fx">›</span> inspect axios</button>
+      <button class="chip" data-cmd="check_publish_history axios"><span class="fx">›</span> check_publish_history</button>
+      <button class="chip" data-cmd="check_maintainer axios"><span class="fx">›</span> check_maintainer</button>
+      <button class="chip" data-cmd="submit_findings"><span class="fx">›</span> submit_findings</button>
+      <button class="chip replay" data-cmd="__reset">↺ replay</button>
     </div>
   </div>
 </header>
 
-<section id="cases">
+<section>
   <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">01</span><h2>Case Files</h2><p>Four episodes, each modeled on a real-world supply chain failure.</p></div>
-    <div class="cases">
-      <article class="case reveal" data-lv="easy" style="--d:0s">
-        <div class="row"><span class="id">Case&nbsp;·&nbsp;Easy</span><span class="tag teal"><span class="dot"></span>Recon</span></div>
-        <h3>Typosquat Detection</h3>
-        <p>An obvious typosquatted package hides in a JavaScript project. Spot the impostor by download counts and unfamiliar authors.</p>
-        <div class="foot"><span>Vector <b>typosquat</b></span><span>Budget <b>12 steps</b></span></div>
-      </article>
-      <article class="case reveal" data-lv="medium" style="--d:.08s">
-        <div class="row"><span class="id">Case&nbsp;·&nbsp;Medium</span><span class="tag amber"><span class="dot"></span>Active</span></div>
-        <h3>Hijacked Maintainer</h3>
-        <p>A trusted package compromised via stolen credentials. Mirrors the March 2026 axios NPM incident — trace the publish history.</p>
-        <div class="foot"><span>Vector <b>hijacked_maintainer</b></span><span>Budget <b>20 steps</b></span></div>
-      </article>
-      <article class="case reveal" data-lv="hard" style="--d:.16s">
-        <div class="row"><span class="id">Case&nbsp;·&nbsp;Hard</span><span class="tag alert"><span class="dot"></span>Deep</span></div>
-        <h3>Transitive Poisoning</h3>
-        <p>A malicious package sits four levels deep and only fires in CI. Direct deps look clean — follow the network logs down the tree.</p>
-        <div class="foot"><span>Vector <b>poisoned_transitive</b></span><span>Budget <b>30 steps</b></span></div>
-      </article>
-      <article class="case reveal" data-lv="medium" style="--d:.24s">
-        <div class="row"><span class="id">Case&nbsp;·&nbsp;Confusion</span><span class="tag amber"><span class="dot"></span>Active</span></div>
-        <h3>Dependency Confusion</h3>
-        <p>A public package shadows an expected internal one and runs unexpected install-time code. Compare intended naming to what installed.</p>
-        <div class="foot"><span>Vector <b>dependency_confusion</b></span><span>Budget <b>20 steps</b></span></div>
-      </article>
+    <div class="lead"><span class="lbl">Registry</span><h2>Case Files</h2><p>Four episodes, each reconstructed from a real supply-chain breach.</p></div>
+    <div class="registry">
+      <div class="hr"><span>ID</span><span>Case</span><span>Attack Vector</span><span>Budget</span><span>Difficulty</span></div>
+      <div class="rr"><span class="cid">easy</span><span class="cnm">Typosquat Detection<small>impostor package by download &amp; author signals</small></span><span class="cvec">typosquat</span><span class="cbud num">12 steps</span><span class="diff"><i class="on"></i><i></i><i></i></span></div>
+      <div class="rr"><span class="cid">medium</span><span class="cnm">Hijacked Maintainer<small>the March 2026 axios NPM takeover</small></span><span class="cvec">hijacked_maintainer</span><span class="cbud num">20 steps</span><span class="diff"><i class="on"></i><i class="on"></i><i></i></span></div>
+      <div class="rr"><span class="cid">hard</span><span class="cnm">Transitive Poisoning<small>four levels deep, fires only in CI</small></span><span class="cvec">poisoned_transitive</span><span class="cbud num">30 steps</span><span class="diff"><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+      <div class="rr"><span class="cid">confusion</span><span class="cnm">Dependency Confusion<small>public package shadows an internal one</small></span><span class="cvec">dependency_confusion</span><span class="cbud num">20 steps</span><span class="diff"><i class="on"></i><i class="on"></i><i></i></span></div>
     </div>
   </div>
 </section>
 
-<section id="baseline">
+<section>
   <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">02</span><h2>Baseline Results</h2><p>Reference agent scores across the four case files, on a 0–1 scale.</p></div>
-    <div class="baseline">
-      <div class="meter reveal" style="--w:90%;--d:0s"><div class="lbl"><span>Easy</span></div><div class="val">0.900</div><div class="bar"><i></i></div></div>
-      <div class="meter reveal" style="--w:90%;--d:.07s"><div class="lbl"><span>Medium</span></div><div class="val">0.900</div><div class="bar"><i></i></div></div>
-      <div class="meter reveal" style="--w:88.1%;--d:.14s"><div class="lbl"><span>Hard</span></div><div class="val">0.881</div><div class="bar"><i></i></div></div>
-      <div class="meter reveal" style="--w:88.5%;--d:.21s"><div class="lbl"><span>Confusion</span></div><div class="val">0.885</div><div class="bar"><i></i></div></div>
+    <div class="lead"><span class="lbl">Toolkit</span><h2>Investigation Actions</h2><p>What the agent can call, one step at a time, within budget.</p></div>
+    <div class="grid2">
+      <div class="ref"><code>list_packages()</code><span>Enumerate the dependency manifest</span></div>
+      <div class="ref"><code>inspect_package()</code><span>Metadata, integrity &amp; install hooks</span></div>
+      <div class="ref"><code>check_publish_history()</code><span>Version timeline &amp; region anomalies</span></div>
+      <div class="ref"><code>check_maintainer()</code><span>Account, 2FA &amp; login signals</span></div>
+      <div class="ref"><code>trace_network()</code><span>Build-step network calls</span></div>
+      <div class="ref"><code>get_dependency_tree()</code><span>Walk transitive deps by depth</span></div>
+      <div class="ref"><code>check_similarity()</code><span>Compare a name to a reference</span></div>
+      <div class="ref"><code>submit_findings()</code><span>Close the case: packages + vectors</span></div>
+    </div>
+    <div class="vecs">
+      <span class="v">typosquat</span>
+      <span class="v">hijacked_maintainer</span>
+      <span class="v">poisoned_transitive_dependency</span>
+      <span class="v">malicious_install_script</span>
+      <span class="v">dependency_confusion</span>
     </div>
   </div>
 </section>
 
-<section id="toolkit">
+<section>
   <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">03</span><h2>Investigation Toolkit</h2><p>Actions the agent calls to build the case, one step at a time.</p></div>
-    <div class="toolkit reveal">
-      <div class="tool"><code>list_packages()</code><span>Enumerate the project's dependencies</span></div>
-      <div class="tool"><code>inspect_package()</code><span>Pull metadata for a single package</span></div>
-      <div class="tool"><code>check_publish_history()</code><span>Surface version gaps &amp; anomalies</span></div>
-      <div class="tool"><code>check_maintainer()</code><span>Review account &amp; region signals</span></div>
-      <div class="tool"><code>trace_network()</code><span>Inspect build-step network calls</span></div>
-      <div class="tool"><code>get_dependency_tree()</code><span>Walk transitive dependencies by depth</span></div>
-      <div class="tool"><code>check_similarity()</code><span>Compare a name against a reference</span></div>
-      <div class="tool"><code>submit_findings()</code><span>Close the case with packages + vectors</span></div>
-    </div>
-    <div class="sec-head reveal" style="margin-top:42px;margin-bottom:16px"><span class="sec-num">·</span><h2 style="font-size:16px">Attack Vectors</h2></div>
-    <div class="vectors reveal">
-      <span class="vec">typosquat</span>
-      <span class="vec">hijacked_maintainer</span>
-      <span class="vec">poisoned_transitive_dependency</span>
-      <span class="vec">malicious_install_script</span>
-      <span class="vec">dependency_confusion</span>
-    </div>
-  </div>
-</section>
-
-<section id="connect">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">04</span><h2>Open a Session</h2><p>Standard OpenEnv HTTP loop — reset, then step until the case closes.</p></div>
+    <div class="lead"><span class="lbl">Connect</span><h2>Drive it over HTTP</h2><p>Standard OpenEnv loop — reset, then step until the case closes. Scored 0–1 (F1 + vector bonus − step penalty).</p></div>
     <div class="connect">
-      <div class="terminal reveal">
-        <div class="bar"><span class="light a"></span><span class="light b"></span><span class="light c"></span><span class="t">bash</span></div>
-<pre><span class="cm"># point at the deployed Space</span>
-<span class="pr">$</span> BASE=<span class="st">https://deshan-5-supply-chain-forensics.hf.space</span>
+      <div class="curl">
+        <div class="ch">bash</div>
+<pre><span class="c"># point at the deployed Space</span>
+<span class="p">$</span> BASE=<span class="s">https://deshan-5-supply-chain-forensics.hf.space</span>
 
-<span class="cm"># start an episode</span>
-<span class="pr">$</span> curl -X POST <span class="st">$BASE/reset</span> \
+<span class="c"># start an episode</span>
+<span class="p">$</span> curl -X POST <span class="s">$BASE/reset</span> \
     -H "Content-Type: application/json" \
-    -d '{<span class="kv">"task"</span>:"medium"}'
+    -d '{<span class="k">"task"</span>:"medium"}'
 
-<span class="cm"># take an investigative action</span>
-<span class="pr">$</span> curl -X POST <span class="st">$BASE/step</span> \
-    -d '{<span class="kv">"session_id"</span>:"...",
-         <span class="kv">"action"</span>:"check_publish_history",
-         <span class="kv">"params"</span>:{"name":"axios"}}'</pre>
+<span class="c"># take an investigative action</span>
+<span class="p">$</span> curl -X POST <span class="s">$BASE/step</span> \
+    -d '{<span class="k">"session_id"</span>:"...",
+         <span class="k">"action"</span>:"check_maintainer",
+         <span class="k">"params"</span>:{"name":"axios"}}'</pre>
       </div>
-      <div class="endpoints reveal" style="--d:.08s">
-        <div class="ep"><span class="verb post">POST</span><span class="path">/reset</span><span class="desc">begin a case</span></div>
-        <div class="ep"><span class="verb post">POST</span><span class="path">/step</span><span class="desc">run one action</span></div>
-        <div class="ep"><span class="verb get">GET</span><span class="path">/state/{id}</span><span class="desc">peek, no cost</span></div>
-        <div class="ep"><span class="verb get">GET</span><span class="path">/tasks</span><span class="desc">list case files</span></div>
-        <div class="ep"><span class="verb get">GET</span><span class="path">/health</span><span class="desc">liveness</span></div>
-        <div class="ep"><span class="verb get">GET</span><span class="path">/docs</span><span class="desc">OpenAPI explorer</span></div>
+      <div class="eps">
+        <div class="ep"><span class="vb p">POST</span><span class="pt">/reset</span><span class="ds">begin a case</span></div>
+        <div class="ep"><span class="vb p">POST</span><span class="pt">/step</span><span class="ds">run one action</span></div>
+        <div class="ep"><span class="vb g">GET</span><span class="pt">/state/{id}</span><span class="ds">peek — no step cost</span></div>
+        <div class="ep"><span class="vb g">GET</span><span class="pt">/tasks</span><span class="ds">list case files</span></div>
+        <div class="ep"><span class="vb g">GET</span><span class="pt">/health</span><span class="ds">liveness probe</span></div>
+        <div class="ep"><span class="vb g">GET</span><span class="pt">/docs</span><span class="ds">OpenAPI explorer</span></div>
       </div>
     </div>
   </div>
@@ -397,130 +322,215 @@
 
 <footer>
   <div class="wrap">
-    <div class="lg reveal">// Incident Log — the real cases this lab is built on</div>
-    <div class="incidents reveal">
-      <div class="inc"><div class="nm">axios</div><div class="ds">maintainer takeover · 2026</div></div>
-      <div class="inc"><div class="nm">ua-parser-js</div><div class="ds">account takeover</div></div>
-      <div class="inc"><div class="nm">event-stream</div><div class="ds">dependency injection</div></div>
-      <div class="inc"><div class="nm">XZ&nbsp;Utils</div><div class="ds">deep transitive backdoor</div></div>
+    <div class="arch">
+      <div class="ac"><div class="n">axios</div><div class="c">MAINTAINER TAKEOVER · 2026</div></div>
+      <div class="ac"><div class="n">ua-parser-js</div><div class="c">ACCOUNT TAKEOVER</div></div>
+      <div class="ac"><div class="n">event-stream</div><div class="c">DEPENDENCY INJECTION</div></div>
+      <div class="ac"><div class="n">XZ Utils</div><div class="c">TRANSITIVE BACKDOOR</div></div>
     </div>
-    <div class="foot-b reveal">
+    <div class="fb">
       <span>SUPPLY CHAIN ATTACK FORENSICS LAB · v1.0.0</span>
-      <span>Built for OpenEnv × Meta × PyTorch × SST — Hackathon · <a href="/docs">API&nbsp;Docs&nbsp;→</a></span>
+      <span>OpenEnv × Meta × PyTorch × SST — Hackathon · <a href="/docs">API Docs →</a></span>
     </div>
   </div>
 </footer>
-</main>
 
 <script>
 (function(){
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // boot -> reveal hero
-  window.addEventListener("load", function(){
-    setTimeout(function(){ document.body.classList.add("booted"); }, reduce ? 0 : 1150);
-  });
-  // safety fallback
-  setTimeout(function(){ document.body.classList.add("booted"); }, 2600);
+  // live UTC clock
+  var clk = document.getElementById("clock");
+  function tick(){ clk.textContent = new Date().toISOString().slice(11,19); }
+  tick(); setInterval(tick, 1000);
 
-  // scroll reveal
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+  var screen = document.getElementById("screen");
+  var cin    = document.getElementById("cin");
+  var chips  = document.getElementById("chips");
+  var evlist = document.getElementById("evlist");
+  var evempty= document.getElementById("evempty");
+  var evct   = document.getElementById("evct");
+  var evfoot = document.getElementById("evfoot");
+  var stamp  = document.getElementById("stamp");
+  var stampscore = document.getElementById("stampscore");
+  var consoleEl = document.getElementById("console");
+
+  var state = { evidence:{}, busy:false, closed:false };
+
+  function pad(s,n){ s=String(s); return s.length>=n ? s : s+" ".repeat(n-s.length); }
+
+  // ── command database ──
+  var PKG = [
+    ["react","18.2.0","29,041,220","2025-11-14",0],
+    ["lodash","4.17.21","61,882,401","2024-05-02",0],
+    ["axios","1.7.9","58,110,004","2026-03-31",1],
+    ["express","4.19.2","42,003,918","2025-09-30",0],
+    ["chalk","5.3.0","301,884,229","2025-07-21",0]
+  ];
+
+  function listPackages(){
+    var out=[];
+    out.push(['<span class="hd">'+pad("PACKAGE",14)+pad("VERSION",11)+pad("WEEKLY DL",15)+"LAST PUBLISH</span>','row']);
+    PKG.forEach(function(p){
+      var base = pad(p[0],14)+pad(p[1],11)+pad(p[2],15)+p[3];
+      if(p[4]) out.push(['<span class="bad">'+base+'  ⚑</span>','row']);
+      else out.push([base,'row']);
     });
-  }, {threshold:.15, rootMargin:"0px 0px -8% 0px"});
-  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
-  document.querySelectorAll(".meter").forEach(function(el){
-    new IntersectionObserver(function(en,ob){ en.forEach(function(x){ if(x.isIntersecting){ x.target.classList.add("in"); ob.disconnect(); } }); },{threshold:.4}).observe(el);
-  });
-
-  // case hover spotlight
-  document.querySelectorAll(".case").forEach(function(c){
-    c.addEventListener("pointermove", function(ev){
-      var r = c.getBoundingClientRect();
-      c.style.setProperty("--mx", ((ev.clientX-r.left)/r.width*100)+"%");
-    });
-  });
-
-  // ── live audit animation ──
-  if(reduce) return;
-  var lines = Array.prototype.slice.call(document.querySelectorAll('.code .ln[data-pkg]'));
-  var pkgs = lines.filter(function(l){ return l.getAttribute("data-pkg"); });
-  var sweep = document.getElementById("sweep");
-  var vtext = document.getElementById("vtext");
-  var verdict = document.getElementById("verdict");
-  var vdot = verdict.querySelector(".dot");
-  var code = document.querySelector(".code");
-
-  function reset(){
-    document.querySelectorAll(".stat").forEach(function(s){ s.classList.remove("show"); });
-    lines.forEach(function(l){ l.classList.remove("hot","compromised"); });
-    vdot.style.color = "var(--dim)";
-    verdict.classList.remove("done");
-    vtext.innerHTML = 'auditing dependencies<span class="caret"></span>';
+    out.push(['<span class="m">5 packages · </span><span class="r">1 flagged</span><span class="m"> for anomalous publish date → </span><span class="d">inspect axios</span>','row']);
+    return {lines:out};
   }
 
-  function typeOut(prefix, bold, done){
-    var full = bold;
-    var i = 0;
-    vtext.innerHTML = prefix + '<b></b><span class="caret"></span>';
-    var b = vtext.querySelector("b");
-    (function tick(){
-      if(i<=full.length){
-        b.textContent = full.slice(0,i);
-        i++;
-        setTimeout(tick, 42);
-      } else { done && done(); }
-    })();
+  var DB = {
+    "list_packages": listPackages,
+    "inspect axios": function(){ return { evidence:["E-01","axios@1.7.9 runs a hidden postinstall script; package signature does not match."], lines:[
+      ['<span class="hd">name       </span> axios','row'],
+      ['<span class="hd">version    </span> 1.7.9        <span class="d">(prev stable 1.7.7)</span>','row'],
+      ['<span class="hd">published  </span> 2026-03-31 04:12 UTC','row'],
+      ['<span class="hd">maintainer </span> @axios-core','row'],
+      ['<span class="hd">integrity  </span> sha512-9f3a…c1  <span class="bad">✗ signature mismatch</span>','row'],
+      ['<span class="hd">install    </span> postinstall → node ./lib/<span class="flag">._setup.js</span>  ⚑','row']
+    ]};},
+    "check_publish_history axios": function(){ return { evidence:["E-02","1.7.9 shipped from a new region (RU-Ural); version 1.7.8 was skipped."], lines:[
+      ['<span class="hd">VERSION   DATE         REGION       PUBLISHER</span>','row'],
+      ['1.7.6     2026-01-09   US-East      @axios-core','row'],
+      ['1.7.7     2026-02-20   US-East      @axios-core','row'],
+      ['<span class="bad">1.7.9     2026-03-31   RU-Ural      @axios-core  ⚑</span>','row'],
+      ['<span class="r">anomaly</span><span class="m">: 1.7.8 skipped · region changed · +4h after email reset</span>','row']
+    ]};},
+    "check_maintainer axios": function(){ return { evidence:["E-03","Maintainer email and 2FA were changed hours before publish — account takeover."], lines:[
+      ['<span class="hd">account    </span> @axios-core','row'],
+      ['<span class="hd">email      </span> changed 2026-03-31 00:07 UTC  <span class="bad">⚑</span>','row'],
+      ['<span class="hd">2FA        </span> disabled 2026-03-31 00:09 UTC  <span class="bad">⚑</span>','row'],
+      ['<span class="hd">last login </span> ASN 20473 <span class="d">(new)</span> · prior ASN 14618','row'],
+      ['<span class="hd">verdict    </span> <span class="r">credential takeover pattern</span>','row']
+    ]};}
+  };
+
+  // ── rendering ──
+  function appendLine(html, cls){
+    var d=document.createElement("div");
+    d.className="row line "+(cls||"");
+    d.innerHTML=html;
+    screen.appendChild(d);
+    screen.scrollTop=screen.scrollHeight;
+  }
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, reduce?0:ms); }); }
+
+  async function stream(lines){
+    for(var i=0;i<lines.length;i++){
+      appendLine(lines[i][0], lines[i][1]);
+      await sleep(75);
+    }
   }
 
-  function run(){
-    reset();
-    sweep.style.transition = "none";
-    sweep.style.opacity = "0";
-    sweep.style.top = "12px";
-
-    var first = pkgs[0], last = pkgs[pkgs.length-1];
-    var codeTop = code.getBoundingClientRect().top;
-    var startY = first.getBoundingClientRect().top - codeTop;
-    var endY = last.getBoundingClientRect().top - codeTop;
-
-    // launch sweep
-    requestAnimationFrame(function(){
-      sweep.style.opacity = "1";
-      sweep.style.top = startY + "px";
-      requestAnimationFrame(function(){
-        sweep.style.transition = "top 3.1s cubic-bezier(.45,0,.55,1)";
-        sweep.style.top = endY + "px";
-      });
-    });
-
-    // stamp each package as the sweep passes
-    var per = 3100 / pkgs.length;
-    pkgs.forEach(function(l, idx){
-      setTimeout(function(){
-        l.classList.add("hot");
-        setTimeout(function(){ l.classList.remove("hot"); }, per*0.9);
-        var kind = l.getAttribute("data-pkg");
-        var stat = l.querySelector(".stat");
-        if(stat) stat.classList.add("show");
-        if(kind === "bad") l.classList.add("compromised");
-      }, 400 + idx*per);
-    });
-
-    // resolve verdict
-    setTimeout(function(){
-      sweep.style.opacity = "0";
-      vdot.style.color = "var(--alert)";
-      verdict.classList.add("done");
-      typeOut('1 compromised · vector&nbsp;', 'hijacked_maintainer', function(){
-        setTimeout(run, 3400);
-      });
-    }, 400 + pkgs.length*per + 300);
+  function addEvidence(id, text){
+    if(state.evidence[id]) return;
+    state.evidence[id]=text;
+    if(evempty) evempty.style.display="none";
+    var d=document.createElement("div");
+    d.className="ev";
+    d.innerHTML='<div class="id">'+id+'</div><div class="tx">'+text+'</div>';
+    evlist.appendChild(d);
+    var n=Object.keys(state.evidence).length;
+    evct.textContent=n;
+    if(n>=2){ evfoot.textContent="✓ enough to submit_findings"; evfoot.classList.add("ready"); }
+    // arm the submit chip
+    if(n>=2){ var s=chips.querySelector('[data-cmd="submit_findings"]'); if(s) s.dataset.armed="1"; }
   }
 
-  // kick off after boot
-  setTimeout(run, reduce ? 0 : 1500);
+  async function closeCase(){
+    var have=Object.keys(state.evidence);
+    if(have.length<2){
+      await stream([['<span class="r">⚠ insufficient evidence.</span><span class="m"> Investigate further — inspect the package and check its history or maintainer.</span>','row']]);
+      return;
+    }
+    await stream([
+      ['<span class="m">cross-referencing evidence ['+have.join(" ")+"]…</span>",'row'],
+      ['<span class="hd">package match   </span> axios                <span class="ok">✓</span>','row'],
+      ['<span class="hd">vector match    </span> hijacked_maintainer  <span class="ok">✓</span>','row'],
+      ['<span class="hd">step efficiency </span> '+have.length+'+1 / 20            <span class="ok">✓</span>','row']
+    ]);
+    await sleep(260);
+    state.closed=true;
+    stampscore.textContent="SCORE 0.90";
+    stamp.classList.add("show");
+    if(!reduce){ consoleEl.classList.add("shake"); setTimeout(function(){consoleEl.classList.remove("shake");},360); }
+    await sleep(160);
+    appendLine('<span class="ok">── CASE CLOSED ──</span> <span class="m">score</span> <span class="ok">0.90</span> · <span class="d">reset the env to run again</span>','row');
+  }
+
+  function normalize(raw){
+    var t=raw.trim().toLowerCase().replace(/\(\)/g,"").replace(/\s+/g," ");
+    if(!t) return null;
+    if(t==="__reset") return "__reset";
+    if(t==="clear"||t==="reset"||t==="replay") return "__reset";
+    if(t==="list"||t==="ls"||t==="list_packages"||t==="list packages") return "list_packages";
+    if(/^inspect/.test(t)) return "inspect axios";
+    if(/(publish|history)/.test(t)) return "check_publish_history axios";
+    if(/maintainer/.test(t)) return "check_maintainer axios";
+    if(/(submit|finding|close)/.test(t)) return "submit_findings";
+    return t; // unknown, handled below
+  }
+
+  async function run(raw){
+    if(state.busy) return;
+    var cmd=normalize(raw);
+    if(!cmd) return;
+    if(cmd==="__reset"){ boot(true); return; }
+
+    state.busy=true; cin.disabled=true;
+    // echo
+    var echo = cmd==="submit_findings" ? "submit_findings --package axios --vector hijacked_maintainer" : cmd;
+    appendLine('<span class="cmd"><span class="p">agent&gt;</span> '+echo+'</span>','');
+    await sleep(140);
+
+    if(cmd==="submit_findings"){ await closeCase(); }
+    else if(cmd==="list_packages"){ var r=DB.list_packages(); await stream(r.lines); }
+    else if(DB[cmd]){
+      var res=DB[cmd]();
+      await stream(res.lines);
+      if(res.evidence){ await sleep(120); addEvidence(res.evidence[0], res.evidence[1]); }
+    } else {
+      await stream([['<span class="r">unknown action:</span> <span class="m">'+raw.trim().replace(/</g,"&lt;")+'</span> — try one of the actions below.','row']]);
+    }
+    appendLine('<span class="d">&nbsp;</span>','');
+    state.busy=false; cin.disabled=false; cin.focus();
+  }
+
+  // ── boot / intro ──
+  async function boot(isReset){
+    state={evidence:{},busy:true,closed:false};
+    screen.innerHTML="";
+    evlist.querySelectorAll(".ev").forEach(function(e){e.remove()});
+    if(evempty) evempty.style.display="";
+    evct.textContent="0";
+    evfoot.textContent="awaiting findings"; evfoot.classList.remove("ready");
+    stamp.classList.remove("show");
+    chips.querySelectorAll(".chip").forEach(function(c){ delete c.dataset.armed; });
+
+    await stream([
+      ['<span class="d">forensics session — case medium · hijacked_maintainer</span>','row'],
+      ['<span class="m">briefing:</span> a trusted npm package shipped a backdoor. audit was clean.','row'],
+      ['<span class="m">objective:</span> name the <span class="r">compromised package</span> and its <span class="r">attack vector</span> within 20 steps.','row'],
+      ['<span class="d">tap an action below, or type one — start with </span>list_packages','row'],
+      ['<span class="d">&nbsp;</span>','']
+    ]);
+    state.busy=false;
+    if(!isReset) { /* leave input unfocused so page doesn't yank scroll on load */ }
+    else cin.focus();
+  }
+
+  chips.addEventListener("click", function(e){
+    var b=e.target.closest(".chip"); if(!b) return;
+    run(b.dataset.cmd);
+    screen.scrollTop=screen.scrollHeight;
+  });
+  cin.addEventListener("keydown", function(e){
+    if(e.key==="Enter"){ var v=cin.value; cin.value=""; run(v); }
+  });
+  screen.addEventListener("click", function(){ if(!state.busy) cin.focus(); });
+
+  boot(false);
 })();
 </script>
 </body>
