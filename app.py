@@ -4,11 +4,12 @@ OpenEnv-compliant HTTP API. Deployed to Hugging Face Spaces.
 """
 
 import os
+from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
 from env.environment import ActionRequest, SupplyChainEnv
@@ -33,6 +34,20 @@ app.add_middleware(
 # In-memory session store (single-user for benchmark runs)
 _sessions: dict[str, SupplyChainEnv] = {}
 
+# Landing page (served to browsers; API clients still get JSON at "/")
+_INDEX_HTML = (Path(__file__).parent / "static" / "index.html").read_text(encoding="utf-8")
+
+_ROOT_JSON = {
+    "name": "Supply Chain Attack Forensics Lab",
+    "version": "1.0.0",
+    "tasks": ["easy", "medium", "hard", "confusion"],
+    "endpoints": {
+        "reset": "POST /reset",
+        "step": "POST /step",
+        "state": "GET  /state/{session_id}",
+    },
+}
+
 
 #Request/Response Models
 
@@ -53,17 +68,12 @@ def health():
 
 
 @app.get("/")
-def root():
-    return {
-        "name": "Supply Chain Attack Forensics Lab",
-        "version": "1.0.0",
-        "tasks": ["easy", "medium", "hard", "confusion"],
-        "endpoints": {
-            "reset": "POST /reset",
-            "step":  "POST /step",
-            "state": "GET  /state/{session_id}",
-        }
-    }
+def root(request: Request):
+    """Serve the landing page to browsers; JSON to API clients (Accept: application/json)."""
+    accept = request.headers.get("accept", "")
+    if "application/json" in accept and "text/html" not in accept:
+        return JSONResponse(_ROOT_JSON)
+    return HTMLResponse(_INDEX_HTML)
 
 
 @app.post("/reset")
